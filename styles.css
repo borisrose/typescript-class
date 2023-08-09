@@ -1,0 +1,22 @@
+section.green.background {
+
+    background-color: lightgreen;
+
+}
+
+section.blue.background {
+
+    background-color: rgb(155, 201, 255);
+    
+}
+
+section.red.background {
+
+    background-color: rgb(244, 149, 149);
+}
+
+section.yellow.background {
+
+    background-color: rgb(255, 207, 117);
+}
+

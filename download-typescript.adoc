@@ -1,0 +1,63 @@
+= Download TypeScript
+
+
+TS peut être installé via trois voies d'installation , dépendant en réalité de comment vous compter l'utiliser.
+
+[%step]
+* un module npm
+* un package NuGet
+* Visual Studio Extension
+
+Si vous utilisez Node.js, npm est la solution. Si vous utilisez MSBuild dans votre projet, privillégiez le package NuGet our l'extension VS
+
+
+== TypeScript dans votre projet 
+
+
+Le fait d'installer typescript pour chaque projet est plus judicieux.
+
+
+=== via npm
+
+TS est disponible comme paquet sur le registre de npm : "typescript"
+
+Vous aurez besoin d'une copie de Node.js comme environnement pour exécuter ce paquet. Ensuite vous utilisez un gestionnaire de dépendances comme npm ou yarn ou pnpm pour télécharge TS dans votre projet.
+
+
+[source, bash]
+----
+npm install typescript --save-dev
+----
+
+=== npm yarn pnpm
+
+Tous ces managers de dépendance supportent lockfiles, ce qui assure à toutes les personnes de votre équipe la même version de TS. Vous pouvez ensuite exécuter la compilation en utilisant la commande suivante :
+
+[source, bash]
+----
+npx tsc
+----
+
+
+
+=== with Visual Studio
+
+
+Pour la plupart des types de projet, on peut obtenir TS comme un paquet dans Nuget pour les projets MSBuild , par exemple une application ASP.NET Core
+
+
+Quand vous utilisez Nuget, vous pouvez installer TS via Visual Studio en utilisant:
+
+
+[%step]
+* La fenête  Manage NuGet Package  (qu'on peut obtenir en faisant un clic droit sur le noeud du projet)
+* The Nuget Package Manager Console (que vous pouvez trouver dans  Tools > NuGet Package Manager > Package Manager Console) puis exécuter: Install-Package Microsoft.TypeScript.MSBuild
+
+
+==== Pour les projets anti-Nuget
+
+Pour les types de projets qui ne supportent pas Nuget, vous pouvez utiliser l'extension TS de VS. 
+
+Vous pouvez installer l'extension en utilisant :
+
+Extensions > Manage Extensions in Visual Studio.

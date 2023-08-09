@@ -1,0 +1,98 @@
+= Advanced Types
+:customcss : styles.css
+
+[.blue.background]
+== La gestion des types personnalisés 
+
+Vu précédemment
+
+[.blue.background]
+== Les types génériques et les inférences
+
+
+Vu précédemment
+
+[.blue.background]
+== Types Génériques
+
+
+Les types génériques fournissent des variables aux types. 
+
+
+Les tableaux (arrays) seraient un exemple commun. 
+
+
+Un tableau sans type générique pourrait tout contenir, alors qu’un tableau avec un type générique restreint son contenu à ce type générique.
+
+
+[.green.background]
+=== Exemples
+
+[source, javascript]
+----
+type StringArray = Array<string>;
+type NumberArray = Array<number>;
+type ObjectWithNameArray = Array<{ name: string }>;
+----
+
+
+[.yellow.background]
+=== Utilisez les types génériques avec vos types customisés 
+
+Vous pouvez utiliser les types génériques avec vos propres types :
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+interface Backpack<Type> {
+  add: (obj: Type) => void;
+  get: () => Type;
+}
+
+// Cette ligne est un raccourci pour informer TS de l'existence d'une
+// d'une constante appelée `backpack`, sans s'inquiéter d'où elle viendrait.
+declare const backpack: Backpack<string>;
+ 
+// object est un string, vu que nous avons déclaré un string
+// en tant que variable à `backpack`.
+const object = backpack.get();
+ 
+// Vu que backpack est un string, vous ne pouvez pas donner de nombre
+// à la fonction add.
+backpack.add(23);
+----
+Argument of type 'number' is not assignable to parameter of type 'string'.
+
+
+[.blue.background]
+== Les classes génériques 
+
+
+Les classes comme les interfaces peuvent être génériques. Quand une classe générique est instanciée avec new, ses paramètres de type sont inférés comme ils le sont dans un appel de fonction.
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+
+class Box<Type> {
+  contents: Type;
+  constructor(value: Type) {
+    this.contents = value;
+  }
+}
+ 
+const b = new Box("hello!");
+     
+const b: Box<string>
+----
+
+[.blue.background]
+== Les restrictions des types génériques 
+
+Vu précédemment
+

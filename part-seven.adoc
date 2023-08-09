@@ -1,0 +1,72 @@
+= Décorateurs
+:customcss : styles.css
+
+[.blue.background]
+== Les décorateurs et les "MetaData"
+
+
+[.blue.background]
+== Comprendre les "factories" de décorateurs
+
+Si on veut personnaliser comment un décorateur est appliqué à une déclaration, on peut écrire une factory de décorateur.
+
+A Decorator Factory is simply a function that returns the expression that will be called by the decorator at runtime.
+
+
+[.yellow.background]
+=== Définition
+Une factory de décorateur est simplement une fonction qui retourne l'expression qui sera appelé par le décorateur au moment de l'exécution du programme
+
+
+[.green.background]
+=== Exemple 
+[source, typeScript]
+----
+function color(value: string) {
+  // this is the decorator factory, it sets up
+  // the returned decorator function
+  return function (target) {
+    // this is the decorator
+    // do something with 'target' and 'value'...
+  };
+}
+----
+
+
+
+[.blue.background]
+== Les décorateurs de classe, propriété, méthode, paramètres
+
+[.yellow.background]
+=== Déclaration spéciale 
+Un décorateur est un genre spécial de déclaration can be être attaché à la déclaration d'une classe, d'une méthode, d'un accesseur, d'une propriété ou d'un paramètre.
+
+
+[.yellow.background]
+=== @expression
+Les décorateurs utilise la forme @expression, où l'expression doit évaluer une fonction qui sera appelée au moment de l'exécution du programme (runtime ) avec des information concernant la déclaration décorée.
+
+
+Par exemple, étant donné le décorateur @sealed , on peut être une fonction scellée de la façon suivante :
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+
+function sealed(target) {
+  // do something with 'target' ...
+}
+
+----
+
+[.blue.background]
+== Créer des décorateurs personnalisés 
+
+Live coding 
+
+[.blue.background]
+== Implémenter les abstractions utiles
+
+Vu précédemment

@@ -1,0 +1,263 @@
+= Composition de Types
+
+
+Avec TypeScript, il est possible de combiner plusieurs types simples en un type complexe. 
+
+
+Deux manières populaires existent : les unions, et les types génériques.
+
+
+
+== Unions
+
+Une union vous permet de déclarer qu’un type pourrait en être un parmi certains. 
+
+
+Par exemple, une façon de décrire le type boolean serait de dire qu’il est soit true, soit false:
+
+[source, javascript]
+----
+type MyBool = true | false;
+----
+
+
+Note: Si vous survolez MyBool, vous verrez que le type est classé en tant que boolean. 
+
+C’est une caractéristique du *Système Structurel de Types*.
+
+
+=== Usage courant des types union
+Un usage populaire des types union est de décrire les ensembles de string ou number acceptables en tant que valeurs :
+
+[source, javascript]
+----
+type WindowStates = "open" | "closed" | "minimized";
+type LockStates = "locked" | "unlocked";
+type PositiveOddNumbersUnderTen = 1 | 3 | 5 | 7 | 9;
+----
+
+
+=== Gestion des types hétégènes
+
+Les unions fournissent également une manière de gérer les *types hétérogènes*. 
+
+Par exemple, vous pouvez avoir une fonction qui accepte un array ou un string :
+
+[source, javascript]
+----
+function getLength(obj: string | string[]) {
+  return obj.length;
+}
+----
+
+=== Pour connaître le type d’une variable, utilisez typeof :
+
+[cols="1,1"]
+|===
+|Type	|Condition
+
+|string
+|typeof s === "string"
+|number
+|typeof n === "number"
+|boolean	
+|typeof b === "boolean"
+|undefined	
+|typeof undefined === "undefined"
+|function
+|typeof f === "function"
+|array	
+|Array.isArray(a)
+|===
+
+=== Conditionner via typeof
+
+Vous pouvez faire en sorte qu’une fonction retourne des valeurs différentes en fonction du type de l’argument passé :
+
+[source, javascript]
+----
+function wrapInArray(obj: string | string[]) {
+  if (typeof obj === "string") {
+    return [obj];
+            
+    //  ^?(parameter) obj: string
+  }
+  return obj;
+}
+----
+
+
+
+== Types Génériques
+
+
+Les types génériques fournissent des variables aux types. 
+
+
+Les tableaux (arrays) seraient un exemple commun. 
+
+
+Un tableau sans type générique pourrait tout contenir, alors qu’un tableau avec un type générique restreint son contenu à ce type générique.
+
+
+=== Exemples
+
+[source, javascript]
+----
+type StringArray = Array<string>;
+type NumberArray = Array<number>;
+type ObjectWithNameArray = Array<{ name: string }>;
+----
+
+=== Utilisez les types génériques avec vos types customisés 
+
+Vous pouvez utiliser les types génériques avec vos propres types :
+
+
+==== Exemple
+
+[source, javascript]
+----
+interface Backpack<Type> {
+  add: (obj: Type) => void;
+  get: () => Type;
+}
+
+// Cette ligne est un raccourci pour informer TS de l'existence d'une
+// d'une constante appelée `backpack`, sans s'inquiéter d'où elle viendrait.
+declare const backpack: Backpack<string>;
+ 
+// object est un string, vu que nous avons déclaré un string
+// en tant que variable à `backpack`.
+const object = backpack.get();
+ 
+// Vu que backpack est un string, vous ne pouvez pas donner de nombre
+// à la fonction add.
+backpack.add(23);
+----
+Argument of type 'number' is not assignable to parameter of type 'string'.
+
+
+== Système Structurel de Types
+
+L’un des principes au cœur de TypeScript est que la vérification des types se concentre sur la forme de la valeur. 
+
+Ce principe est parfois appelé “typage structurel”.
+
+Dans un système structurel, si deux objets ont la même forme (la même structure, d’où le nom), ils sont considérés comme étant du même type.
+
+[source, javascript]
+----
+interface Point {
+  x: number;
+  y: number;
+}
+ 
+function logPoint(p: Point) {
+  console.log(`${p.x}, ${p.y}`);
+}
+ 
+// affiche "12, 26"
+const point = { x: 12, y: 26 };
+logPoint(point);
+----
+
+
+=== Question 
+
+
+La variable point a-t-elle été déclarée en tant que Point ?
+
+
+=== Réponse 
+
+La variable point n’a jamais été déclarée en tant que Point. 
+
+
+=== Comment TypeScript analyse-t-il la situation ?
+
+TypeScript compare la forme de point la variable à la forme de Point l’interface. 
+
+Les deux ont la même forme, donc l’appel est validé.
+
+
+== Seul un sous-ensemble des propriétés d'un objet suffit
+
+La correspondance entre formes requiert uniquement la correspondance d’un sous-ensemble des propriétés d’un objet.
+
+
+=== Exemple 1
+[source, javascript]
+----
+const point3 = { x: 12, y: 26, z: 89 };
+logPoint(point3); // affiche "12, 26"
+----
+ 
+
+=== Exemple 2
+[source, javascript]
+----
+const rect = { x: 33, y: 3, width: 30, height: 80 };
+logPoint(rect); // affiche "33, 3"
+----
+ 
+
+=== Contre-exemple 
+[source, javascript]
+----
+const color = { hex: "#187ABF" };
+logPoint(color);
+----
+Argument of type '{ hex: string; }' is not assignable to parameter of type 'Point'.
+  Type '{ hex: string; }' is missing the following properties from type 'Point': x, y
+Try
+
+
+
+== Les classes et les objets : même conformité face aux formes
+
+Il n’y a aucune différence entre la façon dont les classes et les objets se conforment aux formes :
+
+
+=== Contexte 
+[source, javascript]
+----
+interface Point {
+  x: number;
+  y: number;
+}
+ 
+function logPoint(p: Point) {
+  console.log(`${p.x}, ${p.y}`);
+}
+----
+
+=== Exemple
+
+[source, javascript]
+----
+class VirtualPoint {
+  x: number;
+  y: number;
+ 
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+}
+----
+
+
+=== Résultat
+
+[source, javascript]
+----
+const newVPoint = new VirtualPoint(13, 56);
+logPoint(newVPoint); // affiche "13, 56"
+----
+
+
+=== En conclusion 
+
+Si un objet ou une classe possède toutes les propriétés requises, TypeScript dira que la variable correspond, peu importe les détails d’implémentation.
+

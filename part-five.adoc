@@ -1,0 +1,1780 @@
+= Améliorer la POO avec TypeScript
+:customcss: styles.css
+
+[.blue.background]
+== Les rappels des Pattern POO : Singleton, Factory
+
+Vu précédemment
+
+[.blue.background]
+== L'usage des interfaces TypeScript : "Duck Typing"
+
+Vu précédemment
+
+[.blue.background]
+== Les classes et les interfaces
+
+
+TypeScript gère intégralement le mot clé class introduit dans EMACScript 2015
+
+Il ajoute des annotations de type et d'autres syntaxes pour nous permettre d'exprimer les relations entre des classes et d'autres types. 
+
+[.yellow.background]
+=== Les membres d'une classe
+
+[.yellow.background]
+===  Une classe vide 
+
+[source, javascript]
+----
+class Point {}
+----
+
+Pour l'instant cette classe est inutile donc on va lui ajouter des membres.
+
+
+[.yellow.background]
+=== Des champs (fields)
+
+Une déclaration de champs crée un propriété publique accessible en écriture sur la classe
+
+[source, javascript]
+----
+
+class Point {
+  x: number;
+  y: number;
+}
+
+
+const pt = new Point();
+pt.x = 0;
+pt.y = 0;
+
+----
+
+[.yellow.background]
+=== Observations
+Comme partout ailleurs, les annotations de type sont optionnelles, mais implicitement ce sera un type any si rien n'est spécifié.
+
+Les champs peuvent avoir des initialisateurs. Ils vont s'exécuter automatiquement au moment de l'instantiation de la classe.
+
+
+[.green.background]
+=== Exemple 
+
+[source, javascript]
+----
+class Point {
+  x = 0;
+  y = 0;
+}
+
+const pt = new Point();
+// Prints 0, 0
+console.log(`${pt.x}, ${pt.y}`);
+----
+
+Comme avec const, let et var, l'initialisateur de propriété d'une classe va être utilisé pour inférer son type.
+
+[source, javascript]
+----
+const pt = new Point();
+pt.x = "0";
+Type 'string' is not assignable to type 'number'.
+----
+
+
+[.yellow.background]
+=== --strictPropertyInitialization
+
+Le paramètre  strictPropertyInitialization contrôle si les champs d'une classe doivent être initialisés dans le constructeur.
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+class BadGreeter {
+  name: string;
+    //Property 'name' has no initializer and is not definitely assigned in the constructor.
+}
+
+class GoodGreeter {
+  name: string;
+ 
+  constructor() {
+    this.name = "hello";
+  }
+}
+----
+
+
+[.yellow.background]
+=== Observations
+
+Il faut noter que le champ doit être initialisé dans dans le constructeur. 
+
+TS n'analyse pas les méthodes qu'on invoque depuis le constructeur pour détecter si il y a une initialisation ou pas. 
+
+Il ne fait pas cela car une classe dérivée pourrait courcircuiter ces méthodes et échouer à initialiser les membres. 
+
+[.yellow.background]
+=== Intations
+
+Si vous avez l'intention d'initialiser un champ via un moyen différent que le constructeur par exemple via une bibliothèque externe qui complèterait une partie de votre classe pour vous, vous pouvez utiliser l'opérateur d'assertion d'assignation absolue !: 
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+class OKGreeter {
+  // Not initialized, but no error
+  name!: string;
+}
+----
+
+
+[.blue.background]
+== readonly
+
+Les champs peuvent être préfixés par le modificateur readonly.
+Cela empêche des assignations de valeur pour ce champ en dehors du constructeur.
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+class Greeter {
+  readonly name: string = "world";
+ 
+  constructor(otherName?: string) {
+    if (otherName !== undefined) {
+      this.name = otherName;
+    }
+  }
+ 
+  err() {
+    this.name = "not ok";
+//Cannot assign to 'name' because it is a read-only property.
+  }
+}
+
+
+const g = new Greeter();
+g.name = "also not ok";
+//Cannot assign to 'name' because it is a read-only property.
+
+
+----
+
+
+[.blue.background]
+== Constructors
+
+Les constructeurs de classe sont très semblables aux fonctions. Vous pouvez ajouter des paramètres avec des annotations de type, des valeurs par défaut et des surcharges (overloads)
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+
+class Point {
+  x: number;
+  y: number;
+ 
+  // Normal signature with defaults
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+
+class Point {
+  // Overloads
+  constructor(x: number, y: string);
+  constructor(s: string);
+  constructor(xs: any, y?: any) {
+    // TBD
+  }
+}
+
+
+----
+
+
+[.yellow.background]
+=== Les différences entre la signature d'un constructeur et celle d'une fonction
+
+Les constructuers ne peuvent pas avec de paramètres de type, ceux-là appartiennent à la déclaration de classe extérieure.
+
+
+Les constructuers ne peuvent pas avoir pas avoir d'annotion de type pour la valeur retournée. Le type de l'instance de la classe est toujours ce qui est retourné. 
+
+
+[.yellow.background]
+=== Super Calls 
+
+Comme en JavaScript, si vous avez une classe de base, (une classe mère), vous aurez besoin d'appeler super() dans le corps de votre constructeur avant de pouvoir utiliser un membre this.
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+
+class Base {
+  k = 4;
+}
+ 
+class Derived extends Base {
+  constructor() {
+    // Prints a wrong value in ES5; throws exception in ES6
+    console.log(this.k);
+//'super' must be called before accessing 'this' in the constructor of a derived class.
+    super();
+  }
+}
+----
+
+Oublier d'appeler super est une erreur facile à faire en JS, mais TS vous dira quand c'est nécessaire.
+
+
+
+[.yellow.background]
+=== Méthodes
+
+Une proprité fonction sur une classe est appelée une méthode . Les méthodes peuvent utiliser les mêmes types d'annotation de types que les fonctions et les constructeurs.
+
+[source, typeScript]
+----
+
+class Point {
+  x = 10;
+  y = 10;
+ 
+  scale(n: number): void {
+    this.x *= n;
+    this.y *= n;
+  }
+}
+----
+
+
+[.yellow.background]
+=== Explication
+
+A l'intérieur du corps de la méthode, c'est encore obligatoire d'accéder aux champs et autres méthodes via this.
+
+
+Un nom non qualifié dans le coprs de la méthode fera toujours référence à quelque chose dans le scope l'entourant
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+let x: number = 0;
+ 
+class C {
+  x: string = "hello";
+ 
+  m() {
+    // This is trying to modify 'x' from line 1, not the class property
+    x = "world";
+Type 'string' is not assignable to type 'number'.
+  }
+}
+----
+
+
+
+[.yellow.background]
+=== Getters / Setters
+
+Les classes aussi peuvent avoir des accesseurs
+
+[source, typeScript]
+----
+class C {
+  _length = 0;
+
+  get length() {
+    return this._length;
+  }
+
+  set length(value) {
+    this._length = value;
+  }
+
+}
+
+----
+
+
+[.yellow.background]
+=== Observations
+
+[.yellow.background]
+=== Utilité de l'utilisateur de get et set
+
+Il faut noter qu'une paire get/set soutant un champ sans logique en plus est très rare en JS. 
+
+Il est bon d'exposer les champs publics si vous n'avez pas besoin d'ajouter de logique additionnelle durant les opérations get/set.
+
+[.yellow.background]
+=== Les règles d'inférence des accesseurs 
+
+TS a d'ialleurs des règles d'inférences spciales concernant les accesseurs.
+
+Si gets se termine (exists) mais pas set, la propriété est automatiquement en "readonly". 
+
+Si le type du paramètre set n'est pas spécifié, il est déduit du type retourné par l'accesseur. 
+
+Les Getters et Setter doivent avoir la même visibilité de membre. 
+[.yellow.background]
+=== Nouveauté TS 4.3
+
+Quoique depuis TS 4.3 il est possible d'avoir des accesseurs avec différents types pour l'obtention et la mutation.
+
+[.green.background]
+=== Démonstration
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Thing {
+  _size = 0;
+ 
+  get size(): number {
+    return this._size;
+  }
+ 
+  set size(value: string | number | boolean) {
+    let num = Number(value);
+ 
+    // Don't allow NaN, Infinity, etc
+ 
+    if (!Number.isFinite(num)) {
+      this._size = 0;
+      return;
+    }
+ 
+    this._size = num;
+  }
+}
+----
+
+
+[.blue.background]
+== Signatures d'index 
+
+Les classes peuvent déclarer des signatures d'index. Celles-ci fonctionnenet  de la même façon que les signatures d'index pour les autres types d'objet
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class MyClass {
+
+//s: string  = signature d'index
+[s: string]: boolean | ((s: string) => boolean);
+ 
+  check(s: string) {
+    return this[s] as boolean;
+  }
+}
+
+----
+
+[.yellow.background]
+=== Observations
+
+Etant donné que le type de la signature d'index a besoin de capturer les types des méthodes, ce n'est pas évident d'utiliser utilement ces types. 
+
+Généralement il est préférable de conserver les données indexées autre part au lieu de les conserver sur l'instance elle-même; 
+
+
+[.blue.background]
+== Héritage de classe
+
+
+Comme dans d'autres langages avec des caractéristiques orientées objet, les classes en JS peuvent hériter de classes de base 
+
+
+[.blue.background]
+== Les Clauses implements
+
+On peut utiliser une clause implements pour vérifier qu'une classe satisfait une interface particulière.
+
+Une erreur sera émise si une classe échoie à implémenter correctement l'interface. 
+
+
+[.green.background]
+
+=== Démonstration
+[source, typeScript]
+----
+interface Pingable {
+  ping(): void;
+}
+ 
+class Sonar implements Pingable {
+  ping() {
+    console.log("ping!");
+  }
+}
+ 
+class Ball implements Pingable {
+//Class 'Ball' incorrectly implements interface 'Pingable'.
+  //Property 'ping' is missing in type 'Ball' but required in type 'Pingable'.
+  pong() {
+    console.log("pong!");
+  }
+}
+
+----
+
+
+Des classes peuvent également implémenter plusieurs interface 
+
+
+[.yellow.background]
+=== Prudence 
+
+
+Il est important de comprendre qu'une clause implements is seulement une vérification qu'une classe peut être traitée comme le type de l'interface
+
+
+Cela ne change pas le type de la classe ou ses méthodes.
+
+La clause implements ne change pas le type de la classe.
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+interface Checkable {
+  check(name: string): boolean;
+}
+ 
+class NameChecker implements Checkable {
+  check(s) {
+//Parameter 's' implicitly has an 'any' type.
+    // Notice no error here
+    return s.toLowerCase() === "ok";
+                 
+    //any
+  }
+}
+----
+
+
+[.yellow.background]
+=== Observations
+
+Dans l'exemple actuel , vous vous étiez peut-être atendu à ce que le type de s soit influé par le paramètre name:string de la fonction check. 
+
+Alors qu'en réalité, les clauses implements ne changent pas comment le corps de la classe est vérifié ou comment son type est inféré. 
+
+Similairement, implémenter une interface avec une propriété optionnelle ne créé par cette propriété.
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+interface A {
+  x: number;
+  y?: number;
+}
+class C implements A {
+  x = 0;
+}
+const c = new C();
+c.y = 10;
+//Property 'y' does not exist on type 'C'.
+----
+
+
+[.blue.background]
+== Les clauses extends 
+
+
+Les classes peuvent être l'extension d'une classe de base. 
+
+Une classe dérivée a toutes les propriétés et méthodes de sa classe de base et peut aussi définir des membres additionnels.
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Animal {
+  move() {
+    console.log("Moving along!");
+  }
+}
+ 
+class Dog extends Animal {
+  woof(times: number) {
+    for (let i = 0; i < times; i++) {
+      console.log("woof!");
+    }
+  }
+}
+ 
+const d = new Dog();
+// Base class method
+d.move();
+// Derived class method
+d.woof(3);
+
+----
+
+
+[.blue.background]
+== Les méthodes de surcharge (overriding)
+
+
+Une classe dérivée peut aussi surcharger  les champs d'une classe de abse ou une propriété de cette classe de base.
+
+Vous pouvez utiliser la syntaxe super pour accéder méthodes de classe de base.
+
+
+[.yellow.background]
+=== lookup
+
+Il faut noter qu'étant donné que les classes JS sont simplement des objets de "relation de recherche/référence" (lookup), il n'existe pas la notion de super champ.
+
+
+TS s'assure qu'une classe dérivée est toujours une sous-classe de sa classe de base.
+
+
+Voici un exemple d'une façon légale de surchargger une méthode :
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Base {
+  greet() {
+    console.log("Hello, world!");
+  }
+}
+ 
+class Derived extends Base {
+  greet(name?: string) {
+    if (name === undefined) {
+      super.greet();
+    } else {
+      console.log(`Hello, ${name.toUpperCase()}`);
+    }
+  }
+}
+
+const d = new Derived();
+d.greet();
+d.greet("reader");
+----
+
+C'est important qu'une classe dérivée suive le contrat de sa classe de base.
+
+Rappelez-vous qu'il est très ordinaire et toujours légal de faire référence à une instance d'une classe dérivée à travers une référence à la classe de base
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+// Alias the derived instance through a base class reference
+const b: Base = d;
+// No problem
+b.greet();
+----
+
+
+=== Et si Derived n'a pas respecté le contrat de Base ?
+[source, typeScript]
+----
+class Base {
+  greet() {
+    console.log("Hello, world!");
+  }
+}
+ 
+class Derived extends Base {
+  // Make this parameter required
+  greet(name: string) {
+    //Property 'greet' in type 'Derived' is not assignable to the same property in base type 'Base'.
+    //Type '(name: string) => void' is not assignable to type '() => void'.
+    console.log(`Hello, ${name.toUpperCase()}`);
+  }
+}
+
+//If we compiled this code despite the error, this sample would then crash:
+
+const b: Base = new Derived();
+// Crashes because "name" will be undefined
+b.greet();
+----
+
+
+[.blue.background]
+== Les déclaration de champ spécial type  
+
+Quand target >= ES2022 oui useDefineForClassFields a comme valeur true, 
+
+
+[.yellow.background]
+=== écrasement des valeurs de la classe parent
+
+Les champs de classe sont initialisés une fois que le constructueur de la classe parent a fini de s'exécuter, écrasant toute valeur donnée par la classe parent. 
+
+
+[.yellow.background]
+=== potentiel problème
+Cela peut être un problème quand vous voulez simplement re-déclarer de façon plus exacte un type pour un champ hérité. 
+
+[.yellow.background]
+=== declare
+
+Afin de gérer ces cas, vous pouvez écrire "declare" afin d'indiquer à TS que il ne devrait pas avoir d'effet "runtime"  pour la déclaration de ce champ.
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+interface Animal {
+  dateOfBirth: any;
+}
+ 
+interface Dog extends Animal {
+  breed: any;
+}
+ 
+class AnimalHouse {
+  resident: Animal;
+  constructor(animal: Animal) {
+    this.resident = animal;
+  }
+}
+ 
+class DogHouse extends AnimalHouse {
+  // Does not emit JavaScript code,
+  // only ensures the types are correct
+  declare resident: Dog;
+  constructor(dog: Dog) {
+    super(dog);
+  }
+}
+----
+
+
+
+[.blue.background]
+== Ordre d'initialisation
+
+
+L'ordre dans lequel les classes JS s'initialisent est parfois surprenant. Regardons ce morceau de code :
+
+[source, typeScript]
+----
+class Base {
+  name = "base";
+  constructor() {
+    console.log("My name is " + this.name);
+  }
+}
+ 
+class Derived extends Base {
+  name = "derived";
+}
+ 
+// Prints "base", not "derived"
+const d = new Derived();
+----
+
+
+[.yellow.background]
+=== Que s'est-il passé ici ?
+
+L'ordre d'initialisation de classe tel que défini par JS est le suivant :
+
+[%step]
+* Les champs de la classe de base sont initialisés
+* Le constructeur de la classe de base s'exécute
+* Les champs de la classe dérivée sont initialisés
+* Le constructuer de la classe dérivée s'exécute
+
+
+[.yellow.background]
+=== Signification
+
+Cela signigie que le constructeur de la classe de base a vu sa propre valeur en tant que nom durant l'exécution de son constructeur parce que les initialisations des champs de la classe dérivé ne s'étaient pas encore exécutés.
+
+
+
+
+[.blue.background]
+== Visibilité de Membres
+
+Vous pouvez utiliser TypeScript pour contrôler l’exposition de méthodes et propriétés de la classe vers le code qui lui est externe.
+
+[.yellow.background]
+=== public
+
+La visibilité par défaut de tout membre de classe est public. Il est possible d’accéder à un membre public partout :
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Greeter {
+  public greet() {
+    console.log("salut !");
+  }
+}
+
+
+const g = new Greeter();
+g.greet();
+----
+
+
+Parce que public est déjà la visibilité par défaut, vous n’avez pas besoin de le préciser pour un membre de classe, mais vous pourriez toujours le faire pour des raisons de lisibilité / style de code.
+
+[.yellow.background]
+=== protected
+
+Les membres protected ne sont visibles que dans la classe qui les a déclarés.
+
+[source, typeScript]
+class Greeter {
+  public greet() {
+    console.log("Bonjour, " + this.getName());
+  }
+  protected getName() {
+    return "hi";
+  }
+}
+ 
+class SpecialGreeter extends Greeter {
+  public howdy() {
+    // On peut accéder à this.getName ici
+    console.log("Yo, " + this.getName());
+  }
+}
+const g = new SpecialGreeter();
+g.greet(); // OK
+g.getName();
+
+Property 'getName' is protected and only accessible within class 'Greeter' and its subclasses.
+Try
+
+
+[.yellow.background]
+=== Exposition des membres protected
+
+
+Les classes dérivées doivent suivre les contrats de leurs classes de base, mais peuvent exposer un sous-type qui a plus de possibilités qu’une classe-mère. Ainsi, il est possible de donner une visibilité public à des membres protected à l’origine :
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Base {
+  protected m = 10;
+}
+class Derived extends Base {
+  // Pas de modificateur, le "public" par défaut s'applique
+  m = 15;
+}
+const d = new Derived();
+console.log(d.m); // OK
+----
+
+
+Remarquez que Derived est quand même capable de lire et d’écrire m, donc protéger m n’aura servi à rien. Si vous voulez rendre la propriété protected dans la classe dérivée également, vous devrez répéter le mot-clé protected.
+
+
+[.yellow.background]
+=== Accès aux membres protected entre classes mères et dérivées
+
+Les langages OOP différents ne s’accordent pas si un membre qui est protected est toujours accessible aux classes dérivées :
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class Base {
+  protected x: number = 1;
+}
+class Derived1 extends Base {
+  protected x: number = 5;
+}
+class Derived2 extends Base {
+  f1(other: Derived2) {
+    other.x = 10;
+  }
+  f2(other: Base) {
+    other.x = 10;
+//Property 'x' is protected and only accessible through an instance of class 'Derived2'. This is an instance of 'Base'.
+  }
+}
+----
+
+[.yellow.background]
+=== Java 
+
+Java considère cette manipulation légale, au contraire du C++ et du C#.
+
+
+[.yellow.background]
+=== TS 
+TypeScript se range du côté du C# et C++ dans ce débat. 
+
+
+Accéder à x dans Derived2 doit être légal uniquement à partir de sous-classes de Derived2, ce qui n’est pas le cas de Derived1. De plus, si l’accès à x à travers une Derived1 est illégal pour des raisons évidentes, alors tenter d’y accéder à travers Base ne doit rien y changer.
+
+
+Voir aussi Why Can’t I Access A Protected Member From A Derived Class? qui explique le raisonnement derrière cette interdiction en C#.
+
+[.yellow.background]
+=== private
+
+private ressemble à protected, mais interdit tout accès à la propriété depuis autre chose que la classe elle-même (cela exclut donc les classes dérivées):
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class Base {
+  protected x: number = 1;
+}
+class Derived1 extends Base {
+  protected x: number = 5;
+}
+class Derived2 extends Base {
+  f1(other: Derived2) {
+    other.x = 10;
+  }
+  f2(other: Base) {
+    other.x = 10;
+//Property 'x' is protected and only accessible through an instance of class 'Derived2'. This is an instance of class 'Base'.
+  }
+}
+
+
+class Base {
+  private x = 0;
+}
+const b = new Base();
+// Can't access from outside the class
+console.log(b.x);
+Property 'x' is private and only accessible within class 'Base'.
+Try
+class Derived extends Base {
+  showX() {
+    // Can't access in subclasses
+    console.log(this.x);
+//Property 'x' is private and only accessible within class 'Base'.
+  }
+}
+----
+
+Une classe dérivée ne peut pas modifier la visibilité d’un membre private, vu qu’elle ne le voit même pas :
+
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class Base {
+  private x = 0;
+}
+class Derived extends Base {
+
+//Class 'Derived' incorrectly extends base class 'Base'.
+  //Property 'x' is private in type 'Base' but not in type 'Derived'.
+  x = 1;
+}
+----
+
+[.yellow.background]
+=== Accès à un membre private entre différentes instances
+
+Les langages OOP différents ne s’accordent pas si les instances d’une même classe peuvent accéder à leurs membres privés respectifs. Java, C#, C++, Swift, et PHP le permettent, Ruby l’interdit.
+
+TypeScript le permet :
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class A {
+private x = 10;
+
+public sameAs(other: A) {
+  // No error
+  return other.x === this.x;
+}
+}
+----
+
+
+[.yellow.background]
+=== Considérations
+Comme d’autres aspects de TypeScript, private et protected sont uniquement imposés pendant la compilation.
+
+Cela signifie que des expressions JavaScript in ou une simple lecture de propriétés peuvent accéder à un membre private ou protected :
+
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class MySafe {
+  private secretKey = 12345;
+}
+
+
+// Dans un fichier JavaScript, va afficher 12345
+const s = new MySafe();
+console.log(s.secretKey);
+----
+
+private permet également d’accéder à la propriété avec la notation à crochets. Cela permet de faciliter l’accès aux propriétés private pour, par exemple, les tests unitaires. Le défaut dans cette approche est que ces propriétés ne sont donc pas complètement private.
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class MySafe {
+  private secretKey = 12345;
+}
+ 
+const s = new MySafe();
+ 
+// Interdit durant la vérification
+console.log(s.secretKey);
+----
+
+// Property 'secretKey' is private and only accessible within class 'MySafe'.
+ 
+// OK
+
+[.yellow.background]
+=== Démonstration
+
+[source, typeScript]
+----
+console.log(s["secretKey"]);
+----
+
+Les variables de classes privées (#) resteront privées après compilation et représentent une approche plus stricte aux champs privés, interdisant les contournements disponibles avec le mot-clé private.
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Dog {
+  #barkAmount = 0;
+  personality = "happy";
+ 
+  constructor() {}
+}
+Try
+"use strict";
+class Dog {
+    #barkAmount = 0;
+    personality = "happy";
+    constructor() { }
+}
+----
+
+En compilant vers ES2021 ou inférieur, TypeScript va utiliser des WeakMaps à la place de #.
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+
+"use strict";
+var _Dog_barkAmount;
+class Dog {
+    constructor() {
+        _Dog_barkAmount.set(this, 0);
+        this.personality = "happy";
+    }
+}
+_Dog_barkAmount = new WeakMap();
+ 
+----
+
+Si vous avez besoin de protéger vos valeurs de classes contre les acteurs malicieux, vous devez vous servir de mécanismes offrant de la sécurité stricte durant l’exécution, tel que les closures, WeakMaps, ou les champs privés. Remarquez que ces mesures additionnelles peuvent affecter la performance.
+
+
+
+[.blue.background]
+== Membres statiques
+
+
+Les Classes peuvent avoir des membres static. Ces membres ne sont pas associés à une instance particulière d’une classe, et peuvent être lus depuis le constructeur de la classe elle-même :
+
+
+[.green.background]
+=== Démonstration
+
+
+[source, typeScript]
+----
+class MyClass {
+  static x = 0;
+  static printX() {
+    console.log(MyClass.x);
+  }
+}
+console.log(MyClass.x);
+MyClass.printX();
+----
+
+Les membres static peuvent avoir les mêmes modificateurs public, protected, et private :
+
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class MyClass {
+  private static x = 0;
+}
+console.log(MyClass.x);
+//Property 'x' is private and only accessible within class 'MyClass'.
+----
+
+
+Les membres static peuvent être hérités par les classes dérivées :
+
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class Base {
+  static getGreeting() {
+    return "Hello world";
+  }
+}
+class Derived extends Base {
+  myGreeting = Derived.getGreeting();
+}
+----
+
+
+
+[.yellow.background]
+=== Noms spéciaux de propriétés statiques
+
+
+Généralement, il n’est pas sûr / possible d’écrire sur des propriétés du prototype de Function. Les classes sont elles-mêmes des fonctions qui peuvent être invoquées avec new. Donc certaines propriétés static ne peuvent pas être utilisées. Les propriétés name, length, et call ne peuvent pas être définies en tant que membres static :
+
+
+[source, typeScript]
+----
+class S {
+  static name = "S!";
+//Static property 'name' conflicts with built-in property 'Function.name' of constructor function 'S'.
+}
+----
+
+[.yellow.background]
+=== Pourquoi pas des classes statiques ?
+
+TypeScript (et JavaScript) n’ont pas de classes statiques, de la même façon que, par exemple, C#.
+
+Ces structures n’existent que parce que ces langages obligent toutes les données et fonctions à être à l’intérieur de classes. Elles n’ont aucun intérêt à être dans TypeScript ou JavaScript, ces deux langages n’ayant pas cette restriction. Une classe qui n’a qu’une seule instance est parfois représentée simplement par un objet normal.
+
+Une classe statique n’est pas nécessaire car elle peut très bien se substituer à un objet ou une fonction :
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+// Classe statique non nécessaire
+class MyStaticClass {
+  static doSomething() {}
+}
+ 
+// 1ère alternative privilégiée
+function doSomething() {}
+ 
+// 2ème alternative privilégiée
+const MyHelperObject = {
+  dosomething() {},
+};
+----
+
+
+[.yellow.background]
+=== Blocs statiques dans une classe
+
+Les blocs statiques vous permettent d’écrire des déclarations avec leur propre portée. Cette portée peut lire les champs privés dans la classe qui les contient. Cela signifie que l’on peut écrire ce qu’on veut en termes de code, sans fuite de variables vers l’extérieur, et avec accès complet aux propriétés et méthodes de la classe.
+
+
+[.yellow.background]
+=== Démonstration
+[source, typeScript]
+----
+class Foo {
+    static #count = 0;
+ 
+    get count() {
+        return Foo.#count;
+    }
+ 
+    static {
+        try {
+            const lastInstances = loadLastInstances();
+            Foo.#count += lastInstances.length;
+        }
+        catch {}
+    }
+}
+----
+
+
+
+
+[.blue.background]
+== Les Classes génériques ( section placée ailleurs )
+
+
+[.yellow.background]
+=== this à l’exécution dans les classes
+
+
+
+TypeScript ne change pas le comportement de JavaScript à l’exécution, et JavaScript est célèbre pour ses comportements très particuliers à l’exécution.
+
+
+Cela inclut l’opérateur this :
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class MyClass {
+  name = "MyClass";
+  getName() {
+    return this.name;
+  }
+}
+const c = new MyClass();
+const obj = {
+  name: "obj",
+  getName: c.getName,
+};
+ 
+// Affiche "obj", pas "MyClass"
+console.log(obj.getName());
+----
+
+Pour résumer, par défaut, la valeur de this à l’intérieur d’une fonction dépend de comment la fonction a été appelée. Dans cet exemple, parce que cette fonction a été appelée avec une référence à obj, la valeur de this était obj au lieu d’être l’instance de classe.
+
+C’est rarement le comportement que vous désirez ! TypeScript fournit plusieurs façons de remédier à ce problème.
+
+
+[.blue.background]
+== Les fonctions fléchées
+
+Si vous avez une fonction qui sera souvent appelée d'une façon où elle perd son contexte "this", alors à ce moment-là ça peut être sensé d'utiliser une fonction fléchée au lieu d'une définition de méthode.
+
+
+[.yellow.background]
+=== Démonstration
+
+[source, javascript]
+----
+class MyClass {
+  name = "MyClass";
+  getName = () => {
+    return this.name;
+  };
+}
+
+const c = new MyClass();
+const g = c.getName;
+// Prints "MyClass" instead of crashing
+console.log(g());
+
+----
+
+[.blue.background]
+== Les limites d'une fonction fléchée 
+
+[%step]
+* La valeur this is garantie d'être correcte au moment de l'exécution de programme, même pour le code qui n'a pas été vérifié par TS
+
+
+* Cela va occassionner une plus grande utilisation de la mémoire car chaque instance de la classe aura sa propre copie de chaque fonction définie de cette façon.
+
+
+* On ne peut pas utiliser super.getName dans une classe dérivée, parce qu'il n'y a pas d'entrée dans la chaîne prototypique pour aller cherche la méthode de la classe de base depuis les paramètres de "this".
+
+
+[.blue.background]
+== le paramètre this en TS
+
+Dans une définition de méthode ou de fonction, un paramètre intiial nommé this a un sens spécial en TS. Cas paramètres sont effacés durant le compilation.
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+// TypeScript input with 'this' parameter
+function fn(this: SomeType, x: number) {
+  /* ... */
+}
+
+// JavaScript output
+function fn(x) {
+  /* ... */
+}
+----
+
+TS vérifie si l'appel a une fonction avec un paramètre this est fait dans un contexte approprié. Au lieu d'utiliser une fonction fléché, on peut ajouter un paramètre this aux définitions de méthode pour faire en sorte de façon statique que la méthode est appelée correctement.
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+
+class MyClass {
+  name = "MyClass";
+  getName(this: MyClass) {
+    return this.name;
+  }
+}
+const c = new MyClass();
+// OK
+c.getName();
+ 
+// Error, would crash
+const g = c.getName;
+console.log(g());
+//The 'this' context of type 'void' is not assignable to method's 'this' of type 'MyClass'.
+
+
+----
+
+[.yellow.background]
+=== Limites de l'approche avec le paramètre this
+
+[%step]
+* Les appelants de JS pourraient encore utiliser la méthode de classe de façon incorrecte sans s'en rendre compte.
+* Seulement une fonction par définition de classe serait allouée, au lieu d'une par instance de classe
+* Les définitions des méthodes Base peuent être appelées via super. 
+
+
+
+[.blue.background]
+== Le type this en TS
+
+Dans les classes,un type spécial appelé this fait référence dynamiquement au type de la classe actuelle. 
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+
+class Box {
+  contents: string = "";
+  set(value: string) {
+  
+    //(method) Box.set(value: string): this
+    this.contents = value;
+    return this;
+  }
+}
+
+// En l'occurence, TS déduit le type de la valeur retournée comme étant this, plus que Box. Mettons faisons une sous-classe de Box.
+class ClearableBox extends Box {
+  clear() {
+    this.contents = "";
+  }
+}
+ 
+const a = new ClearableBox();
+const b = a.set("hello");
+     
+const b: ClearableBox
+----
+
+Vous pouvez également utiliser this dans une annotation de type de paramètre
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+class Box {
+  content: string = "";
+  sameAs(other: this) {
+    return other.content === this.content;
+  }
+}
+
+----
+
+Cela est différant d'écrire other:Box . Si vous avez une classe dérivée, sa méthode sameAs n'acceptera maintenant que d'autres instances de cette même classe dérivée.
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+class Box {
+  content: string = "";
+  sameAs(other: this) {
+    return other.content === this.content;
+  }
+}
+ 
+class DerivedBox extends Box {
+  otherContent: string = "?";
+}
+ 
+const base = new Box();
+const derived = new DerivedBox();
+derived.sameAs(base);
+//Argument of type 'Box' is not assignable to parameter of type 'DerivedBox'.
+  //Property 'otherContent' is missing in type 'Box' but required in type 'DerivedBox'.
+----
+
+
+[.blue.background]
+== les gardes de type basées sur this
+
+Vous pouvez utiliser "this is Type" dans la position return pour les méthodes dans les classes et interfaces. 
+
+Quand c'est melangé avec un rétrécissement de type ( dans les déclarations if) le type de l'objet cible sera réduit à ce type spécifique.
+
+
+[.green.background]
+=== Démonstration
+[source, typeScript]
+----
+class FileSystemObject {
+  isFile(): this is FileRep {
+    return this instanceof FileRep;
+  }
+  isDirectory(): this is Directory {
+    return this instanceof Directory;
+  }
+  isNetworked(): this is Networked & this {
+    return this.networked;
+  }
+  constructor(public path: string, private networked: boolean) {}
+}
+ 
+class FileRep extends FileSystemObject {
+  constructor(path: string, public content: string) {
+    super(path, false);
+  }
+}
+ 
+class Directory extends FileSystemObject {
+  children: FileSystemObject[];
+}
+ 
+interface Networked {
+  host: string;
+}
+ 
+const fso: FileSystemObject = new FileRep("foo/bar.txt", "foo");
+ 
+if (fso.isFile()) {
+  fso.content;
+  
+const fso: FileRep
+} else if (fso.isDirectory()) {
+  fso.children;
+  
+const fso: Directory
+} else if (fso.isNetworked()) {
+  fso.host;
+  
+const fso: Networked & FileSystemObject
+}
+----
+
+
+Un usage courant pour les gardes de types basés sur this est d'accepter la validations "lazy" d'un champ particulier 
+Par exemple, ce cas enlève un "undefined" des valeurs contenus à l'intérieur de la box when hasValue a été vérifié comme étant "true"
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+class Box<T> {
+  value?: T;
+ 
+  hasValue(): this is { value: T } {
+    return this.value !== undefined;
+  }
+}
+ 
+const box = new Box();
+box.value = "Gameboy";
+ 
+box.value;
+     
+(property) Box<unknown>.value?: unknown
+ 
+if (box.hasValue()) {
+  box.value;
+       
+(property) value: unknown
+}
+----
+
+[.blue.background]
+== Les propriétés paramètres :
+
+TS offre une syntaxe spéciale pour transformer un paramètre de constructeur en une propriété de classe avec le même nom et la même valeur. On appelle ça les propriétés paramètres et sont crées en préfixant un argument de constructeur avec un modificateur de visibilité suivant : public, private et readonly.
+
+Le champ qui en résult obtient ces modificateurs
+
+[source, javascript]
+----
+class Params {
+  constructor(
+    public readonly x: number,
+    protected y: number,
+    private z: number
+  ) {
+    // No body necessary
+  }
+}
+const a = new Params(1, 2, 3);
+console.log(a.x);
+             
+//(property) Params.x: number
+
+console.log(a.z);
+//Property 'z' is private and only accessible within class 'Params'.
+----
+
+
+[.yellow.background]
+=== Les Expression de classe
+
+
+Les expressions de classe sont très similaires aux déclarations de classe. 
+
+La seule vraie différence est que les expressions de classe n'ont pas beesoin d'un nom, bien qu'on puisse s'y référer via l'identifiant auquel elles sont liées.
+
+[source, typeScript]
+----
+const someClass = class<Type> {
+  content: Type;
+  constructor(value: Type) {
+    this.content = value;
+  }
+};
+ 
+const m = new someClass("Hello, world");
+     
+const m: someClass<string>
+----
+
+
+
+[.yellow.background]
+=== Constructor Signatures
+
+Les classes JS sont instanciées avec l'opérateur new. Etant donné le type de la classe elle-même, le type utilitaire InstanceType donne le modèle type de cette opération. 
+
+
+[.yellow.background]
+=== Démonstration
+[source, javascript]
+----
+class Point {
+  createdAt: number;
+  x: number;
+  y: number
+
+  constructor(x: number, y: number) {
+    this.createdAt = Date.now()
+    this.x = x;
+    this.y = y;
+  }
+}
+type PointInstance = InstanceType<typeof Point>
+ 
+function moveRight(point: PointInstance) {
+  point.x += 5;
+}
+ 
+const point = new Point(3, 4);
+moveRight(point);
+point.x; // => 8
+----
+
+[.blue.background]
+== abstract
+
+Les classes, les méthodes et les champs en TypeScript peuvent être abstraits.
+
+
+[.yellow.background]
+=== Définition
+Une méthode abstraite ou un champ abstrait est celui qui n'a pas d'implémentation fournie. 
+
+Ces membres doivent exister à l'intérieur d'une classe abstraite, qui ne peut être directement instanciée.
+
+
+[.yellow.background]
+=== Rôle 
+Le rôle des classes abstraites est de servir comme de classe de base pour des sous-classes qui elles implémentent les membres abstraits.
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+abstract class Base {
+  abstract getName(): string;
+ 
+  printName() {
+    console.log("Hello, " + this.getName());
+  }
+}
+ 
+const b = new Base();
+//Cannot create an instance of an abstract class.
+----
+
+
+On ne peut pas instancier Base avec new parce qu'elle est abstraite. On a besoin de faire une classe dérivée et d'implémentter les membres abstraits.
+
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+
+class Derived extends Base {
+  getName() {
+    return "world";
+  }
+}
+ 
+const d = new Derived();
+d.printName();
+----
+
+
+Si on oublie d'implémenter les membres abstraits de la classe de base , on aura une erreur.
+
+[source, javascript]
+----
+class Derived extends Base {
+
+//Non-abstract class 'Derived' does not implement inherited abstract member 'getName' from class 'Base'.
+  // forgot to do anything
+}
+----
+
+
+[.yellow.background]
+=== Signatures de construction abstraite
+
+
+Parfois vous voulez accepter une function constructrice de classe qui produits une instance d'une classe qui dérive d'une classe abstraite.
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+
+function greet(ctor: typeof Base) {
+
+  const instance = new ctor();
+
+//Cannot create an instance of an abstract class.
+  instance.printName();
+}
+
+----
+
+TS est en train de vous dire que vous êtes en train d'essayer d'instancier une classe abstraite. 
+Après tout, étant donné la définition de greet, c'est parfait légal d'écrire ce code, qui reviendrait à construire une classe abstraite.
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+// Bad!
+greet(Base);
+----
+
+
+Au lieu de cela, vous voulez écrire une fonction qui accepte quelquechose ayant une signature de construction 
+
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+function greet(ctor: new () => Base) {
+  const instance = new ctor();
+  instance.printName();
+}
+greet(Derived);
+greet(Base);
+
+//Argument of type 'typeof Base' is not assignable to parameter of type 'new () => Base'.
+  //Cannot assign an abstract constructor type to a non-abstract constructor type.
+----
+
+Maintenant TS vous dit à juste titre quelle fonction de constructeur de classe peut être invoquée, en l'occurrence c'est le cas de Derived parce qu'elle est une classe concrète, mais ce n'est pas le cas de Base
+
+
+
+
+[.blue.background]
+== Relations entre les classes
+
+
+Dans la plupart des cas, les classes en TS sont comparées structurellement, comme les autres types
+
+Par exemple, ces deux classes peuvent être utilisées à la place de l'une et de l'autre parce qu'elles sont identiques.
+
+[source, javascript]
+----
+class Point1 {
+  x = 0;
+  y = 0;
+}
+ 
+class Point2 {
+  x = 0;
+  y = 0;
+}
+ 
+// OK
+const p: Point1 = new Point2();
+----
+
+De manière semblable, les relations de sous-type entre les classes existent même si il n'y a pas d'héritage explicite.
+
+
+[source, javascript]
+----
+class Person {
+  name: string;
+  age: number;
+}
+ 
+class Employee {
+  name: string;
+  age: number;
+  salary: number;
+}
+
+// OK
+const p: Person = new Employee();
+----
+
+
+[.yellow.background]
+=== Le cas de classe vide
+
+
+Les classes vident n'ont pas de membres. Dans un système de type structurel , un type avec aucun membre est généralement un super type de quelque chose d'autre. Donc si vous écrivez une classe vide et je ne vous le conseille pas, n'importe quoi peut être utilisé à sa place.
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+---
+class Empty {}
+ 
+function fn(x: Empty) {
+  // can't do anything with 'x', so I won't
+}
+ 
+// All OK!
+fn(window);
+fn({});
+fn(fn);
+---
+
+[.blue.background]
+== Le modificateur de classe : "public, private, readonly"
+
+Vu précédemment
+
+[.blue.background]
+== Les méthodes : "private, protected, overrides"
+
+
+Vu précédemment
+
+[.blue.background]
+== L'héritage simple, multiple
+
+Vu précédemment
+
+
+
+
+

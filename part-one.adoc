@@ -1,0 +1,138 @@
+= Le principe de TypeScript
+:customcss: styles.css
+
+
+
+== Pourquoi Microsoft a créé cette alternative ? 
+
+[.blue.background]
+== La surcouche JavaScript
+
+TypeScript a une relation inhabituelle avec JavaScript. TypeScript offre toutes les fonctionnalités de JavaScript, avec une couche supplémentaire de fonctionnalités : le système de typage.
+
+
+[.yellow.background]
+=== Trouver les bugs avant que le code se lance 
+
+Idéalement, on aurait un outil qui nous aiderait à trouver ces bugs avant que ce code se lance. 
+
+Et c’est là que TypeScript intervient, avec son système de typage statique. 
+
+[.yellow.background]
+=== Sytème de typage statique
+
+Les systèmes de typage statique décrivent les comportements de nos valeurs une fois notre programme lancé. 
+
+
+[.green.background]
+=== type checker
+
+
+Un système de vérification de types comme TypeScript utilise ces informations pour nous dire quand le code risque de se comporter de façon imprévue.
+
+
+[.green.background]
+=== static type checker
+
+Un système de vérification statique de types devra décider quel code doit être considéré comme une erreur, même s’il est du code JavaScript “valide” qui ne retournera pas d’erreur immédiate.
+
+
+
+[.yellow.background]
+=== Répérage des bugs légitimes 
+
+TypeScript repère beaucoup de bugs légitimes.
+
+[%step]
+* Les fautes d'orthographe
+* Les fonctions qui ne sont pas appelées
+* de simples erreurs de logique
+
+
+[.blue.background]
+== La comparaison entre JavaScript et TypeScript
+
+
+[.yellow.background]
+=== Les types primitifs de JS
+
+JavaScript fournit des primitives, comme string et number, mais aucune vérification n’est faite pour s’assurer que les assignations que vous faites sont correctes. TypeScript le fait.
+
+[.yellow.background]
+=== JS est du TS
+
+Cela signifie que votre code JavaScript existant est également du code TypeScript. 
+
+[.yellow.background]
+===  n°1 + de TS 
+
+L’avantage principal de TypeScript est sa capacité à exposer les comportements imprévus dans votre code, diminuant les risques de bugs.
+
+[.blue.background]
+== Le choix de l'éditeur, des plugins et l'installation 
+
+
+[.yellow.background]
+=== Visual Studio Code
+
+Il se peut que vous ayez écrit du JavaScript dans Visual Studio Code, et ayez obtenu de l’autocomplétion de la part de l’éditeur. 
+
+Visual Studio Code utilise TypeScript en arrière-plan pour faciliter le travail avec JavaScript.
+
+
+[.blue.background]
+== L'écosystème d'outils 
+
+
+[.yellow.background]
+=== Le Type-Checker 
+
+TypeScript peut capturer les bugs quand on commet des erreurs dans notre code. 
+
+C’est bien, mais il est également possible de ne pas en faire dès le départ.
+
+
+[.yellow.background]
+=== Le processus du Type-Checker 
+
+TypeScript possède les informations nécessaires pour faire ses vérifications (on dit qu’il est un vérificateur de types, ou type-checker) : 
+
+[%step]
+* est-ce que la propriété ou variable à laquelle on tente d’accéder existe, 
+* quel est son type
+* quelles sont les opérations qu’on peut accomplir dessus. 
+
+
+[.yellow.background]
+=== Conséquence 
+
+De ce fait, le langage peut suggérer les propriétés que vous tentez d’utiliser.
+
+Cela signifie que TypeScript peut être également utilisé dans la modification de code. 
+
+Le type-checker peut fournir des messages d’erreur et autocomplétion pendant que vous écrivez. 
+
+
+[.yellow.background]
+=== Editeur de code et TypeScript
+
+Un éditeur de code qui gère TypeScript peut fournir des “quick fixes” pour:
+
+[%step]
+* corriger automatiquement de petites erreurs, 
+* des suggestions de réorganisation,
+* des fonctionnalités de navigation pour trouver toutes les références à une variable, ainsi que sa définition initiale. 
+
+[.yellow.background]
+=== les IDE supportent TS
+
+Tout cela s’appuie sur le vérificateur de types et il y a de fortes chances que ça soit multi-plateformes, il est donc probable que votre IDE préféré supporte TypeScript.
+
+
+== La configuration de l'environnement de développement
+
+Exemple : live coding
+
+== La transpilation débogage
+
+Exemple : live conding 

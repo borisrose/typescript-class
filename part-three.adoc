@@ -1,0 +1,619 @@
+= TypeScript Basics & Basic Types
+:customcss: styles.css
+
+
+[.blue.background]
+== Les types TypeScript vers JavaScript
+
+[.yellow.background]
+=== Types par Inférence
+
+TypeScript connaît le JavaScript et générera les types pour vous la plupart du temps. 
+
+Par exemple, en créant une variable et en lui assignant une certaine valeur, TypeScript va utiliser cette valeur en tant que type.
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+
+let messageOne = "Mission 1 : suivre Monsieur X"
+    //let messageOne : string
+
+----
+
+
+[.green.background]
+=== Explication
+
+En comprenant comment JavaScript fonctionne, TypeScript peut créer un système qui accepte du code JavaScript, avec des types. 
+
+Le résultat est un système de types qui n’a pas besoin de déclarations explicites de types dans votre code. 
+
+C’est comme ça que TypeScript sait que *messageOne* est un string dans l’exemple précédent (TypeScript a inféré le type string de messageOne).
+
+
+[.yellow.background]
+=== Définir des Types
+
+Vous pouvez utiliser une variété de design patterns en JavaScript. 
+
+[.yellow.background]
+=== Que sont les design patterns ?
+
+Les design patterns, également connus sous le nom de patrons de conception, sont des solutions éprouvées et réutilisables pour résoudre des problèmes de conception de logiciel courants. 
+
+
+[.green.background]
+=== De bonnes pratiques 
+
+Ils sont souvent considérés comme des meilleures pratiques de conception et offrent des modèles de solutions à des problèmes récurrents dans le développement de logiciels.
+
+
+[.yellow.background]
+=== 23 design patterns
+
+Les design patterns ont été popularisés par le livre "Design Patterns: Elements of Reusable Object-Oriented Software", écrit par Erich Gamma, Richard Helm, Ralph Johnson et John Vlissides (connus collectivement sous le nom de Gang of Four ou GoF), publié en 1994. Ce livre a défini 23 design patterns classiques, répartis en trois catégories principales :
+
+
+[.green.background]
+=== Patrons de création
+
+Patrons de création : Ces design patterns sont axés sur la manière de créer des objets tout en cachant les détails spécifiques de l'instanciation. Exemples : Singleton, Factory Method, Abstract Factory, Builder, Prototype.
+
+
+[.red.background]
+=== Singleton Pattern
+
+Il garantit qu'une seule instance d'une classe est créée et fournit un point d'accès global à cette instance.
+
+
+[.red.background]
+=== Exemple
+
+[source, javascript]
+----
+const Singleton = (function() {
+    let instance;
+
+    function createInstance() {
+        // logique de création d'instance
+        return {};
+    }
+
+    return {
+        getInstance: function() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
+
+const instance1 = Singleton.getInstance();
+const instance2 = Singleton.getInstance();
+console.log(instance1 === instance2); // true (même instance)
+----
+
+
+[.red.background]
+=== Factory Pattern
+
+Factory Pattern : Il fournit une interface pour créer des objets dans une classe parente tout en cachant les détails de création.
+
+
+[.red.background]
+=== Exemple
+
+[source, javascript]
+----
+class Product {
+    constructor(name) {
+        this.name = name;
+    }
+}
+
+class ProductFactory {
+    createProduct(name) {
+        return new Product(name);
+    }
+}
+
+const factory = new ProductFactory();
+const product = factory.createProduct("Example Product");
+----
+
+[.green.background]
+=== Patrons de structure
+
+
+Patrons de structure : Ces design patterns traitent de la composition des classes et des objets pour former des structures plus complexes. Ils visent à faciliter la définition de relations entre objets. Exemples : Adapter, Composite, Decorator, Facade, Proxy.
+
+
+[.green.background]
+=== Patrons de comportement
+
+Patrons de comportement : Ces design patterns se concentrent sur les interactions entre les objets et comment ils coopèrent pour accomplir des tâches. Exemples : Observer, Strategy, Command, Iterator, Template Method.
+
+[.green.background]
+=== Chaque design vs un problème spécifique
+
+Chaque design pattern propose une solution éprouvée pour un problème spécifique. 
+
+Ils aident les développeurs à créer des systèmes logiciels plus flexibles, maintenables et évolutifs en utilisant des abstractions bien définies et des concepts de conception solides. 
+
+[.red.background]
+=== Attention !
+
+Cependant, il est important de noter que l'utilisation excessive ou inappropriée de design patterns peut également compliquer inutilement le code. 
+
+Il est donc important de bien comprendre quand et comment appliquer chaque design pattern en fonction du contexte de développement.
+
+[.yellow.background]
+=== Inférence automatique de types vs certains design patterns
+
+Certains patterns rendent difficile l’inférence automatique de types (par exemple, les patterns qui utilisent la programmation dynamique). 
+
+[.yellow.background]
+=== Qu'est-ce que la programmation dynamique ?
+
+La programmation dynamique est une technique de résolution de problèmes algorithmiques qui consiste à diviser un problème en sous-problèmes plus petits et à résoudre chaque sous-problème une seule fois, en stockant les résultats pour éviter de les recalculer à l'avenir. 
+
+[.green.background]
+=== Objectif 
+Cela permet d'optimiser les performances en évitant les calculs redondants. 
+
+Cependant, il faut faire attention à la gestion de la mémoire, car le stockage des résultats intermédiaires peut augmenter la consommation de mémoire.
+
+[.green.background]
+=== Contextes d'utilisation 
+
+La programmation dynamique est souvent utilisée pour résoudre des problèmes de manière efficace, notamment ceux qui présentent une structure récursive ou qui peuvent être décomposés en sous-problèmes.
+
+[.green.background]
+=== En JS
+
+En JavaScript, la programmation dynamique peut être utilisée pour résoudre divers types de problèmes, tels que les problèmes d'optimisation, les problèmes de recherche de chemin, les problèmes de calcul de séquences, etc. 
+
+Revenons au typescript ...
+
+
+[.yellow.background]
+=== La solution de TypeScript : la déclaration d'interface
+
+Pour couvrir ces cas d’usage, TypeScript supporte une extension de JavaScript qui vous offre la possibilité de définir vos types.
+
+Par exemple, il est possible de créer un objet qui contient un name: string et un id: number en écrivant:
+
+[source, javascript]
+----
+const user = {
+    firstname : "Guillaume"
+    lastname: "Dupont",
+    id: 1,
+};
+----
+
+
+
+
+Vous pouvez explicitement décrire *la forme de cet objet* en utilisant une *déclaration d’interface*:
+
+[.green.background]
+=== Exemple
+[source, javascript]
+----
+interface User {
+  firstname : string;
+  lastname : string;
+  id: number;
+}
+----
+
+
+[.yellow.background]
+=== Syntaxe consécutive
+
+Vous pourrez déclarer que votre objet JavaScript respecte cette nouvelle interface en utilisant une syntaxe comme *: TypeName* après une déclaration de variable :
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+const user: User = {
+    firstname : "Guillaume"
+    lastname: "Dupont",
+    id: 1,
+};
+----
+
+
+TypeScript va vous prévenir si vous fournissez un objet qui ne correspond pas à votre interface :
+
+
+[.blue.background]
+== Quand et quoi typer ?
+TypeScript supporte les classes et la programmation orientée objet. Vous pouvez utiliser une déclaration d’interface avec une classe :
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+interface User {
+  firstname : string;
+  lastname : string;
+  id: number;
+}
+ 
+class UserAccount {
+  firstname : string;
+  lastname : string;
+  id: number;
+ 
+  constructor(firstname: string, lastname: string, id: number) {
+    this.firstname = firstname;
+    this.lastname = lastname;
+    this.id = id;
+  }
+}
+
+const user: User = new UserAccount("Alexandre", "Dupont", 2);
+----
+
+Vous pouvez utiliser les interfaces pour annoter les types de paramètres et valeurs de retour de fonctions :
+
+[.green.background]
+=== Annotations de type
+
+[source, javascript]
+----
+async function getAdminUser(): User {
+  // node sequelize style
+  User.findOne({ where : { status : "admin"}})
+}
+ 
+async function deleteUser(user: User) {
+  //node mongoose style
+  User.deleteOne({ id : user.id })
+  
+}
+----
+
+
+[.blue.background]
+== Les types primitifs de JS utilisables dans une interface 
+
+
+JavaScript fournit déjà un petit ensemble de types primitifs, dont vous pouvez vous servir dans une interface : 
+
+[%step]
+* boolean
+* bigint, null, number, string, symbol, et undefined. 
+
+
+[.yellow.background]
+=== Rappel : Les types primitifs 
+
+Le JavaScript possède trois primitives très communes : 
+
+[%step]
+* string
+* number
+* boolean. 
+
+Chacune d’entre elles a un type correspondant en TypeScript. 
+
+Comme vous vous y attendrez, ce sont les mêmes noms que vous verrez si vous utilisez l’opérateur typeof sur les valeurs de ces types :
+
+[.yellow.background]
+=== Cas du number en JS
+
+En JavaScript, tout est un number - il n’existe aucun équivalent à un int ou float. Tout est simplement un number
+
+[.yellow.background]
+=== Attention ❗️
+
+Les noms de types String, Number, et Boolean (avec une première lettre majuscule) existent, mais réfèrent à des types spéciaux qui vont très rarement apparaître dans votre code. Utilisez toujours string, number, ou boolean pour annoter vos types.
+
+[.yellow.background]
+=== Les tableaux 
+
+Pour préciser le type d’un tableau comme [1, 2, 3], vous pouvez utiliser la syntaxe number[];
+
+Cette syntaxe peut être utilisée pour d’autres types (par exemple, string[] est un tableau de chaînes de caractères, et ainsi de suite). 
+
+Vous pourriez aussi voir la notation Array<number>, qui signifie la même chose. 
+
+Nous reverrons cette dernière notation quand nous verrons les types génériques
+
+
+[.blue.background]
+== Les nouveautés TypeScript
+
+TypeScript étend cette liste en y ajoutant :
+
+[%step]
+* any (tout permettre)
+* unknown (s’assurer que quiconque se sert de ce type déclare le type voulu),
+* never (il est impossible d’avoir ce type)
+* void (une fonction qui retourne undefined ou ne retourne rien).
+
+
+
+[.blue.background]
+== Never 
+
+
+Quand vous resserrez le champs des possibles, vous pouvez réduire les options d'union à un niveau où plus aucune possibilité n'existe.
+
+Dans ce cas, TS va utiliser le type never pour représenter un état qui ne devrait pas exister.
+
+[.yellow.background]
+=== Vérification exhaustive 
+
+
+Le type never est assignable à tous les types. Cependant aucun type n'est assignable à never sauf never lui-même.
+
+Cela signifie qu'on peut utiliser le rétrécissement de types avec never dans une déclaration par switch. 
+
+[.green.background]
+=== Exemple
+
+Par exemple, ajouter un "default" à la fonction getArea qui essaie d'assigner shapte à never, va lever une erreur si tous les cas possibles n'ont pas été gérés.
+
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+
+type Shape = Circle | Square;
+ 
+function getArea(shape: Shape) {
+  switch (shape.kind) {
+    case "circle":
+      return Math.PI * shape.radius ** 2;
+    case "square":
+      return shape.sideLength ** 2;
+    default:
+      const _exhaustiveCheck: never = shape;
+      return _exhaustiveCheck;
+  }
+}
+----
+
+[.green.background]
+=== Conséquence
+
+Ajouter un nouveau membre à l'union Shap engendrera une erreur TS
+
+
+[source, typeScript]
+----
+interface Triangle {
+  kind: "triangle";
+  sideLength: number;
+}
+ 
+type Shape = Circle | Square | Triangle;
+ 
+function getArea(shape: Shape) {
+  switch (shape.kind) {
+    case "circle":
+      return Math.PI * shape.radius ** 2;
+    case "square":
+      return shape.sideLength ** 2;
+    default:
+      const _exhaustiveCheck: never = shape;
+    //Type 'Triangle' is not assignable to type 'never'.
+      return _exhaustiveCheck;
+  }
+}
+----
+
+
+[.blue.background]
+== Any
+
+TypeScript possède un type spécial, any, que vous pouvez utiliser dès que vous souhaitez qu’une valeur particulière ne cause pas d’erreurs à la vérification de types.
+
+
+[.yellow.background]
+=== Conséquences 
+
+Quand une valeur est de type any, vous pouvez accéder à toutes ses propriétés (qui seront, à leur tour, de type any), l’appeler comme une fonction, l’assigner à (ou depuis) une valeur de tous types, ainsi que tout ce qui pourrait être légal :
+
+
+[.yellow.background]
+=== Exemple
+
+[source, javascript]
+----
+let obj: any = { x: 0 };
+// Aucune de ces lignes ne va émettre d'erreur.
+// Utiliser `any` désactive toute vérification de types, et TypeScript supposera
+// que vous connaissez l'environnement mieux que lui.
+obj.foo();
+obj();
+obj.bar = 100;
+obj = "hello";
+const n: number = obj;
+----
+
+[.yellow.background]
+=== Contexte d'utilisation
+
+Le type any est utile quand vous ne voulez pas écrire une très grande ligne de typage rien que pour convaincre TypeScript qu’une certaine ligne de code est valide.
+
+
+[.yellow.background]
+=== Rappel : noImplicitAny
+
+Si vous ne précisez pas de type, et TypeScript ne peut pas l’inférer du contexte, le compilateur va adopter le type any.
+
+Or il n’y a aucune vérification de types sur any. 
+
+Utilisez l’option noImplicitAny pour relever toutes ces situations en tant qu’erreurs.
+
+
+
+[.blue.background]
+== Deux syntaxes pour créer des types 
+
+Vous verrez deux syntaxes pour créer des types : les Interfaces et les Types. 
+
+Préférez une interface, mais utilisez un type si vous avez besoin d’une fonctionnalité particulière.
+
+
+[.blue.background]
+== L'expression statique de types
+
+Vu précédemment et live coding
+
+[.blue.background]
+== Assignation et inférence 
+
+
+Quand on assigne une valeur à une variable, TS regarde le membre de droite de l'assignation et rétrécit les possibles types du membre de gauche en fonction.
+
+[.green.background]
+=== Exemple
+[source, javascript]
+----
+
+let x = Math.random() < 0.5 ? 10 : "hello world!";
+   
+let x: string | number
+x = 1;
+ 
+console.log(x);
+           
+let x: number
+x = "goodbye!";
+ 
+console.log(x);
+           
+let x: string
+----
+
+
+[.yellow.background]
+=== Explication
+
+Chacune de ces assignations est valide. Même si le type observé de x est passé à "number", on peut encore assigner une une chaîne de caractères à x. Cela s'explique parce que le type déclaré de x , le type avec lequel x a commencé est string | number , autrement un type union. 
+
+Or l'assignabilité est vérifié en fonction du type déclaré. 
+
+Si on assignait un booléen à x, on aurait vu une erreur puisque cela n'aurait pas fait partie du type déclaré.
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+let x = Math.random() < 0.5 ? 10 : "hello world!";
+   
+let x: string | number
+x = 1;
+ 
+console.log(x);
+           
+let x: number
+x = true;
+----
+
+Type 'boolean' is not assignable to type 'string | number'.
+
+
+
+[.blue.background]
+== Les tuples, les enums, les aliases (type personnalisés)
+
+Exemple en live coding et dans la suite du cours
+
+Les alias arrivent juste après
+
+[.yellow.background]
+=== Alias de Types (type personnalisés)
+
+
+Un alias de type est exactement cela - un nom pour un type. Voici la syntaxe d’un alias de type :
+
+==== Exemple
+[source, javascript]
+----
+type Point = {
+  x: number;
+  y: number;
+};
+ 
+----
+
+==== Utilisation 
+[source, javascript]
+----
+function printCoord(pt: Point) {
+  console.log("La valeur de la coordonnée x est " + pt.x);
+  console.log("La valeur de la coordonnée y est " + pt.y);
+}
+ 
+printCoord({ x: 100, y: 100 });
+----
+
+[.yellow.background]
+=== Les alias de types pour toutes sortes de types
+
+Vous pouvez même utiliser les alias de types pour nommer toutes sortes de types, pas juste des types objet. 
+
+Par exemple, un alias de type peut nommer un type union :
+
+[.green.background]
+=== Exemple
+
+type ID = number | string;
+
+[.yellow.background]
+=== Attention❗️
+
+Vous ne pouvez pas utiliser d’alias pour créer des variantes / versions différentes d’un type déjà existant. 
+
+En utilisant le type alias, c’est comme si vous aviez écrit le type remplacé par l’alias. 
+
+
+En d’autres termes, ce code peut paraître illégal, mais TypeScript l’accepte parce que les deux types sont, en réalité, deux alias pour le même type :
+
+[.yellow.background]
+=== Exemple
+
+[source, javascript]
+----
+type UserInputSanitizedString = string;
+function sanitizeInput(str: string): UserInputSanitizedString {
+  return sanitize(str);
+}
+// Aseptiser l'entrée reçue
+let userInput = sanitizeInput(getInput());
+// Peut toujours recevoir un string
+userInput = "new input";
+----
+
+[.blue.background]
+== les cas de typage particulier (never, void)
+
+Vu précédemment
+
+[.blue.background]
+=== Les fonctions et les tableaux 
+
+Live conding et vu précédemment
+

@@ -1,0 +1,326 @@
+= Configurer le compilateur 
+:customcss: styles.css
+
+
+[.blue.background]
+== tsc : le compilateur
+
+
+[.yellow.background]
+=== le vrai type-checker 
+
+On a parlé du principe de vérification de types, mais pas du vérificateur de types. 
+
+Ce vérificateur n’est autre que le compilateur TypeScript, tsc. 
+
+
+[.yellow.background]
+=== installation
+Tout d’abord, il faut l’installer depuis npm.
+
+[source, bash]
+----
+npm install -g typescript
+----
+
+Cette commande installe globalement le compilateur tsc. 
+
+[.yellow.background]
+=== alternatives
+Si vous préférez utiliser une version locale de TypeScript, vous pouvez utiliser *npx* ou tout autre outil similaire.
+
+[.green.background]
+=== Exemple
+
+Créons un dossier vide et un fichier hello.ts qui contient :
+
+[source, typeScript]
+----
+// Dire bonjour.
+console.log("bonjour !");
+----
+
+[.yellow.background]
+=== identité avec JS
+
+Ce “hello world” est identique à un “bonjour !” en JavaScript. 
+
+
+[.yellow.background]
+=== commande tsc
+
+Maintenant, lançons la commande tsc qui a été installée avec le package typescript.
+
+[source, bash]
+----
+tsc hello.ts
+----
+
+[.yellow.background]
+=== Observation
+
+un nouveau fichier a été créé : dans le même dossier, il y a un hello.js à côté de hello.ts. 
+
+
+C’est le résultat de la compilation de hello.ts en un fichier JavaScript standard. 
+
+[.yellow.background]
+=== Qu'est-ce qui se trouve dedans ? 
+
+Observons le contenu du fichier émis par TypeScript :
+
+// Greets the world.
+console.log("Hello world!");
+
+Ici, TypeScript n’a pas eu grand-chose à transformer, donc le code final est identique au code de départ. 
+
+[.yellow.background]
+=== Le compilateur 
+
+Le compilateur essaie toujours d’émettre du code qui ressemble à ce qu’écrirait une vraie personne. 
+
+TypeScript :
+
+[%step]
+
+* conserve l’indentation, 
+* fait attention quand le code s’étend sur beaucoup de lignes,
+* essaie de conserver les commentaires.
+
+
+[.yellow.background]
+=== Repérage des erreurs dans du JS valide
+
+Essayons d’introduire une erreur de vérification en modifiant hello.ts :
+
+[source, javascript]
+----
+// Fonction de salutation générique et de haut niveau :
+function greet(person, date) {
+  console.log(`Bonjour ${person}, nous sommes le ${date} !`);
+}
+ 
+greet("Brendan");
+----
+
+[.yellow.background]
+=== Constat
+Si on lance tsc hello.ts à nouveau, on remarque qu’on a bel et bien une erreur.
+
+
+Expected 2 arguments, but got 1.
+
+
+TypeScript nous informe qu’on a oublié de passer un argument à la fonction greet, à raison.
+
+[.yellow.background]
+=== Conclusion
+
+Nous avons écrit ce qui peut être vu comme du JavaScript valide, et la vérification de types a quand même pu repérer des erreurs.
+
+
+[.blue.background]
+== La transformation en JS du TS
+
+
+[.yellow.background]
+=== Départ des backticks : le nivellement vers le bas
+
+[source, javascript]
+----
+`Hello ${person}, today is ${date.toDateString()}!`;
+----
+
+[.yellow.background]
+=== Les Templates strings 
+
+
+Les Template strings sont une fonctionnalité d’ECMAScript appelée ECMAScript 2015 (mais aussi ECMAScript 6, ES2015, ES6, etc. - c’est compliqué). 
+
+[.yellow.background]
+=== Ce que TS peut faire 
+TypeScript peut réécrire le code de versions récentes d’ECMAScript vers certaines plus anciennes, tel que ECMAScript 3 ou ECMAScript 5 (ES3 et ES5). 
+
+
+[.yellow.background]
+Le fait de passer d’une version plus récente ou plus neuve d’ECMAScript vers une autre plus basse s’appelle le nivellement vers le bas.
+
+Par défaut, TypeScript vise ES3, une version extrêmement vieille d’ECMAScript. 
+
+[.green.background]
+=== Syntaxe ES3
+[source, javascript]
+----
+"Hello " + person + ", today is " + date.toDateString() + "!";
+----
+
+[.yellow.background]
+=== Choix d'une version plus récente que ES3
+
+Nous aurions pu choisir une version un peu plus récente avec l’option target. 
+
+[source, bash]
+----
+tsc --target es2015 hello.ts
+----
+
+
+[.yellow.background]
+=== --target version_name 
+
+Compiler avec --target es2015 compile TypeScript en visant ECMAScript 2015, donc tout environnement supportant ES2015 peut lancer ce code. 
+
+=== Résultat 
+Lancer tsc --target es2015 hello.ts nous mène au résultat suivant :
+
+[source, javascript]
+----
+function greet(person, date) {
+  console.log(`Hello ${person}, today is ${date.toDateString()}!`);
+}
+greet("Maddison", new Date());
+----
+
+[.yellow.background]
+=== En conclusion
+
+La cible par défaut est ES3, mais tous les navigateurs modernes supportent ES2015.
+
+Donc la plupart des développeurs peuvent viser ES2015 ou plus haut, sauf si supporter d’anciens navigateurs est une contrainte.
+
+[.blue.background]
+== Effacement des annotations de types 
+
+Les annotations de types ne font pas partie de la spécification JavaScript (ou ECMAScript si on veut chercher la petite bête), donc TypeScript ne peut pas s’exécuter dans un navigateur sans modification préalable. 
+
+[.blue.background]
+== L'intérêt du compilateur TS
+
+C’est tout l’intérêt d’un compilateur TypeScript - il permet de transformer le code et lui permettre de se lancer. 
+La plupart du code propre à TypeScript est effacée, y compris nos annotations de types.
+
+== le fichier "tsconfig.json"
+
+
+
+[.background.blue]
+== Les options du compilateur 
+
+TypeScript est utilisé pour diverses raisons.
+
+[.yellow.background]
+=== Option 1 / par défaut : laxiste
+
+
+[.green.background]
+=== T-checking à votre discrétion
+
+Certains développeurs veulent une expérience laxiste et volontaire. 
+
+TypeScript peut valider certaines parties du programme uniquement, tout en laissant ses capacités disponibles. 
+
+
+C’est l’expérience par défaut avec TypeScript, où le typage est optionnel.
+
+
+L’inférence déduit des types vagues, et aucune valeur null/undefined n’est vérifiée. 
+
+[.green.background]
+=== Intérêt 
+
+Tout comme tsc émet des fichiers même avec des erreurs, ces comportements par défaut sont en place pour qu’ils ne vous entravent pas. 
+
+Ce serait une première étape désirable si vous migrez du code JavaScript.
+
+[.yellow.background]
+=== Option 2 : strict 
+
+
+[.green.background]
+=== Plusieurs options
+D’autres utilisateurs souhaitent que TypeScript valide et soit strict le plus possible, d’où plusieurs options disponibles à cet effet. 
+
+
+[.green.background]
+=== Niveaux de rigueur
+
+Ces paramètres permettent d’avoir des “niveaux” de rigueur (allant du laxiste au plus strict possible) plutôt que d’avoir deux options binaires (faire de la vérification de code ou pas du tout). 
+
+
+Plus vous montez en niveaux de rigueur, plus TypeScript vous assistera avec la validation et la vérification. 
+
+
+Cela peut nécessiter du travail supplémentaire, mais il se rentabilise sur le long terme. 
+
+
+[.yellow.background]
+=== Conseil
+
+Si possible, une nouvelle base de code doit toujours avoir les vérifications strictes activées.
+
+
+
+[.blue.background]
+== Les options de rigueur de TS
+
+
+TypeScript a plusieurs options de rigueur qui peuvent être activées ou pas, et tous nos exemples les suivront, sauf si le contraire est mentionné. 
+
+[.yellow.background]
+=== commande 
+L’option strict dans la ligne de commande, ou "strict": true dans le fichier tsconfig.json les active toutes ensemble, mais il est possible de les désactiver individuellement. 
+
+Les deux options les plus importantes sont:
+
+[%step]
+* noImplicitAny 
+* strictNullChecks.
+
+
+[.yellow.background]
+=== noImplicitAny
+À certains endroits, TypeScript n’essaie pas d’inférer de types et va rendre le type le plus laxiste : any. 
+
+Ce n’est pas forcément un problème - de toute façon, le type any est ce que JavaScript va vous donner.
+
+[.green.background]
+=== any où la perte de l'intérêt de TS
+
+Cependant, utiliser any ne donne plus aucun intérêt d’utiliser TypeScript. 
+
+[.green.background]
+=== Intérêt du typage
+
+Plus votre programme est couvert par du typage, plus vous serez épaulé en termes de validation et d’outillage, et moins vous aurez de bugs. 
+
+==== Conséquence de l'activation de l'option noImplicitAny
+Activer l’option noImplicitAny va remonter une erreur pour toute variable avec un type qui a été inféré en any.
+
+[.yellow.background]
+=== strictNullChecks
+
+Par défaut, les valeurs comme null et undefined sont assignables à tout autre type. Cela peut s’avérer pratique, mais oublier de gérer null et undefined est la cause d’innombrables bugs.
+
+L’option strictNullChecks rend la gestion de null et undefined plus explicite.
+
+
+[.blue.background]
+== Créer un "build"
+
+Exemple en live coding
+
+[.yellow.background]
+== Les stratégies de projets à configuration multiples
+
+Ci-dessus 
+
+[.blue.background]
+== L'inclusion et l'exclusion de ressources
+
+Exemple en live coding
+
+[.blue.background]
+== La création d'un workflow personnalisé
+
+Ci-dessus
+

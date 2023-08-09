@@ -1,0 +1,122 @@
+= TypeScript en pratique
+
+:customcss: styles.css
+
+[.blue.background]
+== Usage avec Node.js
+
+Vu précédemment
+
+[.blue.background]
+== Livrer du code JavaScript compatible avec TypeScript
+
+Le système de type  dans TS possède différents niveaux de rigueur en travaillant avec une base de code :
+
+
+[%step]
+* Un système de typage basé sur la déduction avec le Code JS
+* Un typage incrémental dans JS via JSDoc
+* Usage de // @ts-check dans un fichier JS
+* Du Code TS
+* TS avec l'option strict activée 
+
+
+[.yellow.background]
+=== Signification
+
+Chaque étape représente un mouvement vers un système de type plus sûr, mais tous les projets n'ont pas besoin d'un tel niveau de vérification.
+
+
+[.blue.background]
+== TypeScript with JavaScript
+
+
+
+Ceci arrive quand on utilise un editeur qui utilise TS afin de founir un outil comme auto-complete, en passant par symbol et des outils de refactoring comme rename. 
+
+
+[.yellow.background]
+=== Fournir des indices de type dans JS via JSDoc
+
+
+Dans un fichier .js, les types peuvent souvent être inférés. Quand ils ne peuvent pas l'être, ils peuvent être spécifiés en utilisant la syntaxe JSDoc 
+
+
+Les annotations JSDoc mises avant une déclaration  seront utilisés pour définir le type de cette déclaration. Par exemple :
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+/** @type {number} */
+var x;
+ 
+x = 0; // OK
+x = false; // OK?!
+----
+
+
+[.blue.background]
+== @ts-check
+
+La dernière ligne du code précédent aurait soulevé une erreur en TS, mais cela ne se fait pas par défaut dans un projet en JS. Pour activier les erreors dans vos fichiers JS, il faut ajouter 
+@ts-check  à la première ligne dans vos fichiers .js
+
+[.yellow.background]
+=== Démonstration
+[source, javascript]
+----
+// @ts-check
+/** @type {number} */
+var x;
+ 
+x = 0; // OK
+x = false; // Not OK
+//Type 'boolean' is not assignable to type 'number'.
+----
+
+Si vous avez beaucoup de fichiers JS dans lesquelles vous souhaitez ajouter la vérification d'erreurs TS, vous pouvez carrément utiliser un jsconfig.json. Vous pouvez aller décider des fichiers qui ne sont pas à vérifier via
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+//@ts-ignore  
+----
+
+ou 
+
+[source, javascript]
+----
+// @ts-expect-error
+----
+
+TS peut vous offrir des erreurs avec lesquelles vous n'êtes pas d'accord. Vous pouvez alors ignorer ces erreurs en mettant avant la ligne où elles se trouvent 
+
+[.green.background]
+=== Démonstration
+[source, javascript]
+----
+//@ts-ignore  
+----
+
+ou 
+
+[source, javascript]
+----
+// @ts-expect-error
+----
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+// @ts-check
+/** @type {number} */
+var x;
+ 
+x = 0; // OK
+// @ts-expect-error
+x = false; // Not OK
+----

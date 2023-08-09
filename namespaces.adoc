@@ -1,0 +1,305 @@
+= Namespaces
+
+
+Il est important de noter qu'en TS 1.5  la nomenclature a changé. Ce qui était appelé " modules internes " est maintenant appelé " nampespaces". 
+
+Les modules externes sont devenus tout simplement les modules a des fins d'alignement avec la terminologie d'ECMAScript 2015 
+
+Autrement dit 
+
+[source, javascript]
+----
+module X {}
+
+// serait maintenant écrit :
+
+namespace X {}
+----
+
+
+On va donc voir ici les différentes façons d'organiser votre code en utilisant namespaces ( avant : modules internes)
+ 
+en TS.
+
+
+== Première étape 
+
+
+Commençons avec le programme qu'on va utiliser comme exemple. J'ai écrit un petit ensemble de validateurs de chaînes de caractères ( très simples ) comme ceux que vous auriez pu utiliser pour vérifier un input dans un formulaire ou que vous auriez pu utiliser pour contrôler le format d'un fichier remplie de données externes 
+
+
+
+=== Validateurs dans un seul fichier :
+
+[source, javascript]
+----
+interface StringValidator {
+  isAcceptable(s: string): boolean;
+}
+
+
+let lettersRegexp = /^[A-Za-z]+$/;
+
+
+let numberRegexp = /^[0-9]+$/;
+
+// clause implements 
+class LettersOnlyValidator implements StringValidator {
+  isAcceptable(s: string) {
+    return lettersRegexp.test(s);
+  }
+}
+
+
+class ZipCodeValidator implements StringValidator {
+  isAcceptable(s: string) {
+    return s.length === 5 && numberRegexp.test(s);
+  }
+}
+
+// Some samples to try
+let strings = ["Hello", "98052", "101"];
+// Validators to use
+let validators: { [s: string]: StringValidator } = {};
+
+
+validators["ZIP code"] = new ZipCodeValidator();
+
+validators["Letters only"] = new LettersOnlyValidator();
+// Show whether each string passed each validator
+
+for (let s of strings) {
+  for (let name in validators) {
+    let isMatch = validators[name].isAcceptable(s);
+    console.log(`'${s}' ${isMatch ? "matches" : "does not match"} '${name}'.`);
+  }
+}
+----
+
+
+== Namespacing
+
+
+En ajoutant de plus en plus de validateurs, on va vouloir avoir une sorte de schéma organisationnel afin qu'on puisse garder la trace de nos types et pour éviter des collisions avec d'autres objets.
+
+Au lieu de mettre un tas de noms différents dans un espace de nom global, on va rassembler nos objets dans un seul espace de nom.
+
+
+Dans cet exemple, on va mettre toutes les entités reliées au validateur dans un espace de nom appelé Validation.
+
+Etant donné qu'on veut que les interfaces et les classes présentes soient visibles à l'extérieur de l'espace de nom, on les préfixe avec export
+
+
+Par convention; les variables lettersRegexp et numberRegexp sont des détails d'implémentation, donc elles resterons non exportées et ne seront pas visibles au code qui est à l'extérieur de l'espace de nom.
+
+
+Dans le code test à la fin du fichier, on n'a maintenant besoin de qualifier les noms des types quand ils sont utilisés en dehors de l'espace de nom (ex: Validation.LettersOnlyValidator).
+
+
+
+=== Namespaced Validators
+
+[source, javascript]
+----
+
+namespace Validation {
+  export interface StringValidator {
+    isAcceptable(s: string): boolean;
+  }
+  const lettersRegexp = /^[A-Za-z]+$/;
+  const numberRegexp = /^[0-9]+$/;
+  export class LettersOnlyValidator implements StringValidator {
+    isAcceptable(s: string) {
+      return lettersRegexp.test(s);
+    }
+  }
+  export class ZipCodeValidator implements StringValidator {
+    isAcceptable(s: string) {
+      return s.length === 5 && numberRegexp.test(s);
+    }
+  }
+}
+// Some samples to try
+let strings = ["Hello", "98052", "101"];
+// Validators to use
+let validators: { [s: string]: Validation.StringValidator } = {};
+validators["ZIP code"] = new Validation.ZipCodeValidator();
+validators["Letters only"] = new Validation.LettersOnlyValidator();
+// Show whether each string passed each validator
+for (let s of strings) {
+  for (let name in validators) {
+    console.log(
+      `"${s}" - ${
+        validators[name].isAcceptable(s) ? "matches" : "does not match"
+      } ${name}`
+    );
+  }
+}
+----
+
+=== Séparer  à travers les fichiers
+
+
+Tandis que notre application grandit, on aura besoin de séparer le code à travers de multiple fichiers afin de le rendre plus facile à maintenir;
+
+
+==== Multi-file namespaces
+
+
+En  l'occurrence on va séparer notre espace de nom Validation à travers plusieus fichiers. Bien que les fichiers soient séparés, ils peuvent chacun contribuer au même espace de nom et peuvent être consommés comme si ils étaient tous définis au même endroit. Vu qu'il y a des dépendances entre les fichiers, on va ajouter des tags de référence pour dire au compilateur quelles sont les relations qui existent entre les fichiers. 
+
+
+[source, javascript]
+----
+//Validation.ts
+namespace Validation {
+  export interface StringValidator {
+    isAcceptable(s: string): boolean;
+  }
+}
+----
+
+[source, javascript]
+----
+//LettersOnlyValidator.ts
+/// <reference path="Validation.ts" />
+namespace Validation {
+  const lettersRegexp = /^[A-Za-z]+$/;
+  export class LettersOnlyValidator implements StringValidator {
+    isAcceptable(s: string) {
+      return lettersRegexp.test(s);
+    }
+  }
+}
+----
+
+
+[source, javascript]
+----
+//ZipCodeValidator.ts
+/// <reference path="Validation.ts" />
+namespace Validation {
+  const numberRegexp = /^[0-9]+$/;
+  export class ZipCodeValidator implements StringValidator {
+    isAcceptable(s: string) {
+      return s.length === 5 && numberRegexp.test(s);
+    }
+  }
+}
+----
+
+
+[source, javascript]
+----
+Test.ts
+/// <reference path="Validation.ts" />
+/// <reference path="LettersOnlyValidator.ts" />
+/// <reference path="ZipCodeValidator.ts" />
+// Some samples to try
+let strings = ["Hello", "98052", "101"];
+// Validators to use
+let validators: { [s: string]: Validation.StringValidator } = {};
+validators["ZIP code"] = new Validation.ZipCodeValidator();
+validators["Letters only"] = new Validation.LettersOnlyValidator();
+// Show whether each string passed each validator
+for (let s of strings) {
+  for (let name in validators) {
+    console.log(
+      `"${s}" - ${
+        validators[name].isAcceptable(s) ? "matches" : "does not match"
+      } ${name}`
+    );
+  }
+}
+----
+
+
+Once there are multiple files involved, we’ll need to make sure all of the compiled code gets loaded. There are two ways of doing this.
+
+First, we can use concatenated output using the outFile option to compile all of the input files into a single JavaScript output file:
+
+tsc --outFile sample.js Test.ts
+The compiler will automatically order the output file based on the reference tags present in the files. You can also specify each file individually:
+
+tsc --outFile sample.js Validation.ts LettersOnlyValidator.ts ZipCodeValidator.ts Test.ts
+Alternatively, we can use per-file compilation (the default) to emit one JavaScript file for each input file. If multiple JS files get produced, we’ll need to use <script> tags on our webpage to load each emitted file in the appropriate order, for example:
+
+[source, xml]
+----
+<!-- MyTestPage.html (excerpt)-->
+<script src="Validation.js" type="text/javascript" />
+<script src="LettersOnlyValidator.js" type="text/javascript" />
+<script src="ZipCodeValidator.js" type="text/javascript" />
+<script src="Test.js" type="text/javascript" />
+----
+
+=== Alias
+
+Une autre façon de simplifier l'utilisation des espaces de nom est d'utiliser 
+import q = x.y.z afin de créer des noms plus cours pour des objets souvent utilisés.
+
+Il ne faut pas confondre cela avec la syntaxe  import x = require("name") utilisée pour charger des modules. Cette syntaxe crée simplement un alias pour un symbole spécifique. On peut utiliser ces sortes d'imports ( communément appelés alias ) pour tout sorte d'identifiant dont des objets crés depuis des imports modulaires; 
+
+
+
+[source, typeScript]
+----
+namespace Shapes {
+  export namespace Polygons {
+    export class Triangle {}
+    export class Square {}
+  }
+}
+import polygons = Shapes.Polygons;
+
+
+let sq = new polygons.Square(); // Same as 'new Shapes.Polygons.Square()'
+----
+
+
+Remarquez qu'on n'utilise pas le mot clé require. Au lieu de cela, on assigne directement via le nom qualifié du symbole. 
+
+
+D'ailleurs, pour des valeurs, l'import est une référence distincte de celle du symbole originel, donc des changements apportés à une variable-alias n'auront aucun effet sur la variable originelle
+
+
+
+=== Working with Other JavaScript Libraries
+
+Afin de décrire la forme des bibliothèques qui ne sont pas écrites en TS, on doit déclarer l'API qui expose la bibliothèque.
+
+Etant donné que la plupart des bibliothèques JS expose seulement quelques objects globaux (top-level) , les espaces de nom sont un bon moyen de les représenter.
+
+
+On appelle les déclarations qui ne definissent pas une implémentation "ambiantes". Typiquement celles-ci sont définies dans des fichiers .d.ts. Si vous avez l'habitude de C et C ++ ces fichiers sont comme les fichiers .h. 
+
+
+=== Ambient namespaces
+
+
+La célèbre bibliothèque D3 définit ses fonctionalités dans un objet global appelé d3. Etant donné que cette bibliothèque est chargé à travers un tag script au lieu d'un chareur de module, sa déclaration utilises les espaces de npm pour définir sa forme. 
+
+Pour que le compilateur TS puisse connaître sa forme, on a besoin d'une déclaration d'espace de nom ambiante. 
+
+
+D3.d.ts (simplified excerpt)
+
+[source, typeScript]
+----
+declare namespace D3 {
+  export interface Selectors {
+    select: {
+      (selector: string): Selection;
+      (element: EventTarget): Selection;
+    };
+  }
+  export interface Event {
+    x: number;
+    y: number;
+  }
+  export interface Base extends Selectors {
+    event: Event;
+  }
+}
+declare var d3: D3.Base;
+----

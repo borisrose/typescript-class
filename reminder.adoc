@@ -1,0 +1,58 @@
+= JavaScript
+
+
+== Null / Undefined
+
+vérifier si quelque chose == null vérifie aussi si elle == undefined. De même, si quelque chose == undefined, JavaScript vérifiera aussi si elle == null.
+
+
+== Opérateur In
+
+JavaScript a un opérateur qui permet de savoir si dans un objet il existe une propriété avec un nom précis : l'opérateur in. 
+TypeScript utilise cet opérateur pour le rétrécissement de types
+
+[source, javascript]
+----
+type Fish = { swim: () => void };
+type Bird = { fly: () => void };
+ 
+function move(animal: Fish | Bird) {
+  if ("swim" in animal) {
+    return animal.swim();
+  }
+ 
+  return animal.fly();
+}
+----
+
+== instanceof 
+
+JavaScript a un opérateur qui permet de vérifier si une valeur est une instance d'une autre. 
+
+Plus spécifiquement, en JavaScript :
+
+[source, javascript]
+----
+
+x instanceof Foo 
+
+----
+
+vérifie si la chaîne prototypique de x contient le prototype de Foo.
+TypeScript utilise instanceof comme un garde de types
+
+[source, javascript]
+----
+function logValue(x: Date | string) {
+  if (x instanceof Date) {
+    console.log(x.toUTCString());
+               
+(parameter) x: Date
+  } else {
+    console.log(x.toUpperCase());
+               
+(parameter) x: string
+  }
+}
+----
+

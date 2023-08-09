@@ -1,0 +1,849 @@
+= Next-generation JavaScript
+:customcss: styles.css
+
+
+[.blue.background]
+== Inclure/ Générer des fichiers de définition pour la compatibilité
+
+
+[.yellow.background]
+=== Objets avec propriétés
+
+En l'occurence , myLib est une variable gloable qui a une fonction makeGreeting pour créer des salutations, et une propriété 
+numberOfGreetings qui indique le nombre de salutations faites jusqu'à présent.
+
+
+[.green.background]
+=== Exemple : myLib
+
+[source, typeScript]
+----
+let result = myLib.makeGreeting("hello, world");
+console.log("The computed greeting is:" + result);
+let count = myLib.numberOfGreetings;
+----
+
+[.blue.background]
+== Declaration d'espace de nom
+
+On utlise declare namespace pour décrire les types et les valeurs auxquels on a accès pour la notation par point
+
+
+[source, typeScript]
+----
+declare namespace myLib {
+  function makeGreeting(s: string): string;
+  let numberOfGreetings: number;
+}
+----
+
+
+[.blue.background]
+== Overloaded Functions
+
+La fonction getWidget accepte un nombre et retour un Widget, ou accepte une chaîne de caractères et retourne un tableau de Widget
+
+
+[.green.background]
+=== Exemple 
+[source, typeScript]
+----
+
+let x: Widget = getWidget(43);
+let arr: Widget[] = getWidget("all of them");
+----
+
+
+[.green.background]
+=== Exemple
+
+[source, typeScript]
+----
+//Declaration
+
+declare function getWidget(n: number): Widget;
+declare function getWidget(s: string): Widget[];
+----
+
+
+[.blue.background]
+== Reusable Types (Interfaces)
+
+
+
+[.green.background]
+=== Exemple
+
+Qunad vous spécifiez une salutation, vous devez passer un objet GreetingSettings. Cet objet a les propriétés suivantes :
+
+[%step]
+* - greeting: Mandatory string
+
+* - duration: Optional length of time (in milliseconds)
+
+* - color: Optional string, e.g. ‘#ff00ff’
+
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+greet({
+  greeting: "hello world",
+  duration: 4000
+});
+----
+
+[.yellow.background]
+=== Méthode 
+Utilisez une interface pour définir un type avec ses propriétés.
+
+
+[source, typeScript]
+----
+interface GreetingSettings {
+  greeting: string;
+  duration?: number;
+  color?: string;
+}
+
+
+declare function greet(setting: GreetingSettings): void;
+----
+
+
+=== Reusable Types (Type Aliases)
+
+Quel que soit l'endroit où une salutation est attendue, on peut fournir une chaîne de caractères, une fonction retourant une chaîne de caractères ou une instance de Greeter.
+
+[.green.background]
+=== Exemple
+
+[source, typeScript]
+----
+function getGreeting() {
+  return "howdy";
+}
+class MyGreeter extends Greeter {}
+greet("hello");
+greet(getGreeting);
+greet(new MyGreeter());
+----
+
+[.yellow.background]
+=== type alias
+
+You can use a type alias to make a shorthand for a type:
+
+
+[.green.background]
+=== Exemple
+
+[source, typeScript]
+----
+type GreetingLike = string | (() => string) | MyGreeter;
+declare function greet(g: GreetingLike): void;
+----
+
+
+=== Organizing Types
+
+L'objet greet peut se log à un fichier ou afficher une alerte.
+On peut fournir LogOptions à un .log(...) et des options d'alerte à un .alert(...)
+
+
+[.green.background]
+=== Exemple
+
+[source, typeScript]
+----
+const g = new Greeter("Hello");
+g.log({ verbose: true });
+g.alert({ modal: false, title: "Current Greeting" });
+----
+
+
+Utilisez des espaces de nom pour organiser les types.
+
+
+[.green.background]
+=== Exemple
+
+declare namespace GreetingLib {
+  interface LogOptions {
+    verbose?: boolean;
+  }
+  interface AlertOptions {
+    modal: boolean;
+    title?: string;
+    color?: string;
+  }
+}
+
+
+Vous pouvez aussi créer des espaces de nom nichées dans une déclaration
+
+[.green.background]
+=== Exemple
+
+[source, typeScript]
+----
+declare namespace GreetingLib.Options {
+  // Refer to via GreetingLib.Options.Log
+  interface Log {
+    verbose?: boolean;
+  }
+  interface Alert {
+    modal: boolean;
+    title?: string;
+    color?: string;
+  }
+}
+----
+
+[.yellow.background]
+=== Classes
+
+
+Vous pouvez creer a greeter en instanciant l'objet Greeter ou créer un greeter personalisée en étendant l'objet Greet 
+
+[.green.background]
+=== Exemple
+
+[source, typeScript]
+----
+const myGreeter = new Greeter("hello, world");
+myGreeter.greeting = "howdy";
+myGreeter.showGreeting();
+class SpecialGreeter extends Greeter {
+  constructor() {
+    super("Very special greetings");
+  }
+}
+----
+
+Utilisez declare class pour décrire une classe ou un objet class. Les classes peuvent avoir des propriétés et des méthodes comme un constructeur.
+
+[.green.background]
+=== Exemple
+[source, typeScript]
+declare class Greeter {
+  constructor(greeting: string);
+  greeting: string;
+  showGreeting(): void;
+}
+
+[.yellow.background]
+=== Variables Globales
+
+
+La variable globale foo contient le nombre de widget présent.
+
+[source, typeScript]
+----
+
+console.log("Half the number of widgets is " + foo / 2);
+
+----
+
+[.yellow.background]
+=== Explication
+
+On utilise declare var pour déclarer des variables. Si la variable est en lecture seule, on peut utiliser declare const.
+On peut aussi utiliser declarer let si la variable est une variable local au block
+
+[.green.background]
+=== Démontration
+
+[source, typeScript]
+----
+/** The number of widgets present */
+declare var foo: number;
+----
+
+
+[.yellow.background]
+=== Functions Globales
+
+On peut appeler la fonction greet avec une chaîne de caractère pour afficher une salutation pour l'utilisateur
+
+[source, typeScript]
+----
+greet("hello, world");
+----
+
+On utilise declaration function pour déclarer des fonctions.
+
+[.green.background]
+=== Démonstration
+
+[source, typeScript]
+----
+declare function greet(greeting: string): void;
+----
+
+
+[.blue.background]
+== La programmation "Ahead-of-Time" , réduire la dette technique 
+
+Explication via live coding
+
+[.blue.background]
+== Les modules et les espaces de noms
+
+
+Le JavaScript a une longue histoire et plusieurs manières différentes de gérer du code séparé en modules. 
+
+[.yellow.background]
+=== 2012
+
+TypeScript, présent depuis 2012, a géré plusieurs de ces formats, mais avec le temps, la communauté et la spécification JavaScript ont convergé sur un format appelé les ES Modules (ou modules ES6). 
+
+
+Vous l’aurez peut-être connue avec la syntaxe import/export.
+
+[.yellow.background]
+=== ES Modules
+
+Les ES Modules ont été ajoutés à la spécification JavaScript 2015, et ont été supportés dans la plupart des moteurs JavaScript en 2020.
+
+
+
+Pour ne pas s’éparpiller, on va couvrir les ES Modules et leur précurseur populaire, la syntaxe CommonJS de module.exports =. 
+
+
+[.blue.background]
+== Comment les modules JavaScript sont définis
+
+
+[.yellow.background]
+=== Ce qui est un module
+
+Dans TypeScript, tout comme dans ECMAScript 2015, tout fichier contenant un import ou export est un module.
+
+[.yellow.background]
+=== Ce qui est un script
+
+De même, tout fichier sans déclaration d’import ou d’export est considéré comme un script dont le contenu est disponible dans la portée globale (donc disponible pour les modules).
+
+
+[.yellow.background]
+=== Le scope des modules
+
+Les Modules possèdent leur propre portée dans laquelle ils sont exécutés, donc ils ne sont pas exécutés dans la portée globale.
+
+
+[.yellow.background]
+=== Conséquence 
+
+Cela signifie que toute variable, fonction, classe, etc. déclarée dans un module n’est pas visible en dehors du module, sauf si explicitement exportés d’une façon ou d’une autre.
+
+
+[.yellow.background]
+=== L'utilisation de import
+
+De même, pour utiliser une variable, fonction, classe, interface, etc. exportée d’un module différent, une forme d’import doit être utilisée.
+
+[.yellow.background]
+=== Ce qui n’est pas un Module
+
+Il est important de comprendre ce que TypeScript considère comme un module. 
+
+
+[.yellow.background]
+=== Ce que la spécification JS déclare
+
+La spécification JavaScript déclare que tout fichier JavaScript sans un export ni d’await à la portée la plus haute du fichier doit être considéré comme un script, pas comme un module.
+
+Dans un fichier de script, les variables et types sont déclarés et accessibles dans la portée globale, et TypeScript suppose que :
+
+* vous utiliserez  l’option de compilateur outFile pour assembler plusieurs fichiers d’entrée dans un fichier de sortie
+
+* vous utiliserez des balises <script> dans votre HTML pour charger ces fichiers (dans le bon ordre !).
+
+[.yellow.background]
+=== Actuce 
+
+Si vous avez des fichiers qui n’ont pas d’import, ni d’export, mais que vous souhaitez traiter comme des modules, ajoutez la ligne :
+
+[source, typeScript]
+----
+export {};
+----
+
+qui va convertir le fichier en un module qui n’exporte rien. 
+
+Cette syntaxe fonctionne peu importe votre façon de gérer les imports et exports.
+
+
+[.blue.background]
+== Modules en TS
+
+
+Il y a trois éléments principaux à considérer quand vous écrivez du code basé sur des Modules en TypeScript :
+
+[%step]
+
+* Syntaxe : Quelle syntaxe voudrais-je utiliser pour importer et exporter mes modules ?
+* Résolution de Modules : Quelle est la relation entre les noms (ou chemins) de modules et leurs fichiers sur le disque ?
+* Cible d’émission de Modules : À quoi doit ressembler mon code JavaScript émis en sortie ?
+
+
+[.yellow.background]
+=== Syntaxe ES Module
+
+Un fichier peut déclarer un export principal avec export default: 
+
+[source: typeScript]
+----
+// @filename: hello.ts
+export default function helloWorld() {
+  console.log("Bonjour tout le monde !");
+}
+----
+
+Qui est donc importé avec :
+
+[source: javascript]
+----
+import helloWorld from "./hello.js";
+helloWorld();
+
+----
+
+[.yellow.background]
+=== Les exports en plus du export default
+En plus de l’export principal, vous pouvez avoir plus d’un export de variables et fonctions via le mot-clé export en omettant default :
+
+[.green.background]
+=== Exemple
+[source, typeScript]
+----
+// @filename: maths.ts
+export var pi = 3.14;
+export let squareTwo = 1.41;
+export const phi = 1.61;
+ 
+export class RandomNumberGenerator {}
+ 
+export function absolute(num: number) {
+  if (num < 0) return num * -1;
+  return num;
+}
+
+----
+
+
+
+Ces exports peuvent être utilisés avec la syntaxe import :
+
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+import { pi, phi, absolute } from "./maths.js";
+ 
+console.log(pi);
+const absPhi = absolute(phi);
+        
+const absPhi: number
+----
+
+[.yellow.background]
+=== Syntaxe d’import additionnelle
+
+Un import peut être renommé en utilisant un format comme import { old as new }:
+
+[source, javascript]
+----
+import { pi as π } from "./maths.js";
+ 
+console.log(π);
+           
+//(alias) var π: number
+//import π
+----
+
+
+[.yellow.background]
+==== Combinaison d'import
+
+Vous pouvez combiner les deux façons d’importer dans un seul import :
+
+[source, typeScript]
+----
+// @filename: maths.ts
+export const pi = 3.14;
+export default class RandomNumberGenerator {}
+----
+
+
+[source, javascript]
+----
+// @filename: app.ts
+import RandomNumberGenerator, { pi as π } from "./maths.js";
+ 
+RandomNumberGenerator;
+         
+//(alias) class RandomNumberGenerator
+//import RandomNumberGenerator
+ 
+console.log(π);
+           
+//(alias) const π: 3.14
+//import π
+----
+
+[.yellow.background]
+=== Les espaces de nom
+
+Vous pouvez assembler tous les éléments exportés dans un espace de noms avec * as name:
+
+[source, javascript]
+----
+// @filename: app.ts
+import * as math from "./maths.js";
+ 
+console.log(math.pi);
+const positivePhi = math.absolute(math.phi);
+          
+const positivePhi: number
+
+----
+
+=== Ne pas inclure de variables mais importer le fichier
+
+Vous pouvez importer un fichier et ne pas inclure de variables dans votre module actuel avec import "./file":
+
+[source, typeScript]
+----
+// @filename: app.ts
+import "./maths.js";
+ 
+console.log("3.14");
+----
+
+[.yellow.background]
+=== Effets de bord potentiels
+
+Dans ce cas, l’import ne fait rien. Cela dit, tout le code de maths.ts est évalué, ce qui peut provoquer des effets de bord dans d’autres parties.
+
+
+
+[.blue.background]
+== Syntaxe d’ES Modules propre à TypeScript
+
+
+Les types peuvent être importés et exportés en utilisant la même syntaxe que JavaScript:
+
+
+[source, typeScript]
+----
+// @filename: animal.ts
+export type Cat = { breed: string; yearOfBirth: number };
+ 
+export interface Dog {
+  breeds: string[];
+  yearOfBirth: number;
+}
+ 
+// @filename: app.ts
+import { Cat, Dog } from "./animal.js";
+type Animals = Cat | Dog;
+
+----
+
+
+TypeScript a ajouté deux concepts à la syntaxe d’import pour importer un type :
+
+
+[.yellow.background]
+=== import type
+
+Une déclaration d’import qui ne peut importer que des types :
+
+[source, typeScript]
+----
+// @filename: animal.ts
+export type Cat = { breed: string; yearOfBirth: number };
+'createCatName' cannot be used as a value because it was imported using 'import type'.
+export type Dog = { breeds: string[]; yearOfBirth: number };
+export const createCatName = () => "bloom";
+ 
+// @filename: valid.ts
+import type { Cat, Dog } from "./animal.js";
+export type Animals = Cat | Dog;
+ 
+// @filename: app.ts
+import type { createCatName } from "./animal.js";
+const name = createCatName();
+
+----
+
+[.yellow.background]
+== Imports de type en une ligne
+
+TypeScript 4.5 permet également de préfixer des déclarations d’imports en une ligne avec type pour indiquer que l’import en une ligne est un type :
+
+[source, typeScript]
+----
+// @filename: app.ts
+import { createCatName, type Cat, type Dog } from "./animal.js";
+ 
+export type Animals = Cat | Dog;
+
+const name = createCatName();
+----
+
+[.yellow.background]
+=== Intérêt 
+
+Cela permet aux outils qui n’interagissent pas avec TypeScript, comme Babel, SWC ou esbuild de savoir quels imports peuvent être enlevés en toute sécurité.
+
+
+
+[.blue.background]
+== Syntaxe ES Module au comportement CommonJS
+
+
+TypeScript possède une syntaxe ES Module qui correspond directement au require de CommonJS et AMD. 
+
+Les imports qui utilisent la syntaxe ES Module sont pour la plupart un équivalent de require dans ces environnements, mais cette syntaxe vous garantira que vous aurez une correspondance identique entre votre fichier TypeScript et le fichier de sortie de CommonJS :
+
+[source, typeScript]
+----
+import fs = require("fs");
+const code = fs.readFileSync("hello.ts", "utf8");
+----
+
+
+[.blue.background]
+== Syntaxe CommonJS
+
+
+Le format CommonJS est le format dans lequel la plupart des modules npm sont fournis. 
+
+Même si vous vous contentez d’écrire en ES Modules, une brève compréhension du mode de fonctionnement de CommonJS vous permettra de faciliter votre débogage.
+
+[.yellow.background]
+=== Exports
+
+Les identifiants sont exportés en définissant la propriété exports sur un objet global appelé module.
+
+
+[source, javascript]
+----
+function absolute(num: number) {
+  if (num < 0) return num * -1;
+  return num;
+}
+ 
+module.exports = {
+  pi: 3.14,
+  squareTwo: 1.41,
+  phi: 1.61,
+  absolute,
+};
+----
+
+Ces fichiers peuvent maintenant être importés avec require :
+
+[.green.background]
+=== Exemple
+
+[source, javascript]
+----
+const maths = require("maths");
+maths.pi;
+----
+
+[.yellow.background]
+=== Utilisation de la destructuration
+Vous pouvez simplifier en utilisant la déstructuration en JavaScript :
+
+[source, javascript]
+----
+const { squareTwo } = require("maths");
+squareTwo;
+   
+const squareTwo: any
+----
+
+
+[.yellow.background]
+=== Interopérabilité entre CommonJS et ES Modules
+
+Il y a une certaine différence de fonctionnalités entre les modules CommonJS et ES Module, en terme d’usage de l’objet module ou de définition d’export par défaut. 
+
+
+TypeScript possède une option de compilateur pour réduire les conflits entre les deux ensembles de contraintes et de règles avec *esModuleInterop*.
+
+
+[.yellow.background]
+=== Options de résolution de modules de TypeScript
+
+La résolution de modules est le procédé de détermination du fichier à importer en fonction de la chaîne de caractères dans la déclaration d’import ou require.
+
+TypeScript possède deux stratégies de résolution de modules : 
+
+[%step]
+* Classic
+* Node. 
+
+
+[.yellow.background]
+=== Classic, 
+
+l’option par défaut quand l’option module n’est pas égale à commonjs, est incluse pour des raisons de rétro-compatibilité. 
+
+
+
+[.yellow.background]
+=== Node
+
+La stratégie Node réplique la façon de fonctionnement de Node.js avec CommonJS, avec des vérifications supplémentaires pour les fichiers .ts et .d.ts.
+
+Beaucoup d’options de tsconfig influencent la stratégie de résolution de modules dans TypeScript : 
+
+[%step]
+* moduleResolution
+* baseUrl
+* paths
+* rootDirs.
+
+
+
+[.blue.background]
+== Options d’émission de modules en TypeScript
+
+Deux options affectent le code JavaScript émis :
+
+[%step]
+* target
+* module
+
+[.yellow.background]
+=== option target
+
+
+target détermine quelles fonctionnalités JS sont nivelées vers le bas (converties pour être exécutées dans des moteurs plus anciens) et lesquelles doivent rester intactes
+
+
+[.yellow.background]
+=== option module
+
+module détermine quelle stratégie est utilisée pour les interactions entre modules
+
+
+[.yellow.background]
+=== moteur JS
+
+Les fonctionnalités disponibles dans votre moteur JavaScript détermineront la valeur de l’option target où votre code se lancera. 
+
+
+[.yellow.background]
+=== la valeur de l'option target
+Cela pourrait être : 
+
+[%step]
+* le navigateur le plus ancien que vous supportez
+* la version-cible la plus basse de Node.js
+* ou des contraintes uniques de votre environnement - comme avec Electron par exemple.
+
+
+[.blue.background]
+== Le chargeur de modules
+
+Tout module doit passer par un chargeur de modules avant d’être utilisé, et l’option module détermine quel chargeur vous utiliserez. 
+
+À l’exécution, le chargeur de modules s’occupe de localiser et exécuter toutes les dépendances d’un module avant de l’exécuter.
+
+
+Par exemple, voici un fichier TypeScript qui utilise la syntaxe d’ES Modules, démontrant différentes options pour module :
+
+
+[.green.background]
+=== Démonstration
+
+[source, javascript]
+----
+import { valueOfPi } from "./constants.js";
+
+export const twoPi = valueOfPi * 2;
+----
+
+
+[.yellow.background]
+=== ES2020
+
+[source, javascript]
+----
+import { valueOfPi } from "./constants.js";
+
+export const twoPi = valueOfPi * 2;
+----
+
+[.yellow.background]
+=== CommonJS
+[source, javascript]
+----
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.twoPi = void 0;
+const constants_js_1 = require("./constants.js");
+exports.twoPi = constants_js_1.valueOfPi * 2;
+----
+
+[.yellow.background]
+=== UMD
+[source, javascript]
+----
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "./constants.js"], factory);
+    }
+})(function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.twoPi = void 0;
+    const constants_js_1 = require("./constants.js");
+    exports.twoPi = constants_js_1.valueOfPi * 2;
+});
+----
+
+Remarque, ES2020 est effectivement le même que index.ts.
+
+
+[.blue.background]
+[.blue.bakground]
+== Espaces de noms TypeScript
+
+TypeScript possède son propre format de modules, les namespaces, qui datent d’avant les ES Modules. 
+
+Cette syntaxe a beaucoup de fonctionnalités pratiques pour créer des fichiers de définitions complexes, et est utilisée activement chez DefinitelyTyped. 
+
+Les espaces de noms ne sont pas dépréciés, mais la majorité de fonctionnalités dans les espaces de noms existent dans les ES Modules et nous la recommandons pour vous aligner sur JavaScript. 
+
+
+[.blue.background]
+== L'impact sur la syntaxe JavaScript
+
+Vu précédemment et live coding
+
+[.blue.background]
+== Automatiser la documentation
+
+Vu précédemment et live coding
+
+[.blue.background]
+== Utiliser TypeScript avec du code JavaScript standard
+
+
+Vu précedemment et live coding
